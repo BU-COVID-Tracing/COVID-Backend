@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS registry;
+
+USE registry;
+
+CREATE TABLE IF NOT EXISTS keyStore (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    chirp Varchar(8) NOT NULL,
+    time TIMESTAMP NOT NULL
+);
