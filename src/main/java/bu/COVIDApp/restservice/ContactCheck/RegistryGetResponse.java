@@ -1,7 +1,7 @@
 package bu.COVIDApp.restservice.ContactCheck;
 
-import bu.COVIDApp.Database.KeySetData;
 
+import bu.COVIDApp.Database.SQLKeySet.KeySetData;
 import java.util.ArrayList;
 
 

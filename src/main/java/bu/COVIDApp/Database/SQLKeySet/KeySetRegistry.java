@@ -1,4 +1,4 @@
-package bu.COVIDApp.Database;
+package bu.COVIDApp.Database.SQLKeySet;
 
 import org.springframework.data.repository.CrudRepository;
 

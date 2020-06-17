@@ -1,11 +1,9 @@
 package bu.COVIDApp.restservice.ContactCheck;
 
-import bu.COVIDApp.Database.KeySetData;
-import bu.COVIDApp.Database.KeySetRegistry;
-import bu.COVIDApp.restservice.ContactCheck.Accessors.KeySetAccessor;
-import bu.COVIDApp.restservice.ContactCheck.Accessors.KeyValBloomFilterAccessor;
-import bu.COVIDApp.restservice.ContactCheck.Accessors.RegistryAccessor;
+import bu.COVIDApp.Database.DatabaseInterface;
+import bu.COVIDApp.Database.SQLKeySet.KeySetData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +12,15 @@ import java.util.ArrayList;
 
 @Controller
 public class RegistryAccessController {
-    @Autowired
-    private KeySetRegistry keyReg;
 
+    @Autowired
+    //TODO: Find a way to initialize the interfaces such that spring knows about them and can autowire the database objects
+    @Qualifier("keySetRegistryInterface")
+    private DatabaseInterface myInterface;
+
+    RegistryAccessController(){
+//        this.myInterface = DatabaseInterface.InterfaceInitializer();
+    }
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked
      * as infected
@@ -26,8 +30,7 @@ public class RegistryAccessController {
     @GetMapping("/contactCheck")
     public @ResponseBody
     ArrayList<KeySetData> getContactCheck (@RequestParam(value = "authentication", defaultValue = "") String authentication){
-        RegistryAccessor myAccessor = new KeySetAccessor(keyReg);
-        return myAccessor.getKeys().getMyDataContainer();
+        return myInterface.getKeys().getMyDataContainer();
     }
 
     /**
@@ -37,16 +40,7 @@ public class RegistryAccessController {
      */
     @PostMapping("/contactCheck")
     public boolean postContactCheck(@RequestBody RegistryPostInput UserInput){
-        RegistryAccessor myAccessor = new KeyValBloomFilterAccessor("endpoint");
-        return myAccessor.checkKeys(UserInput.getKeys());
+        return myInterface.checkKeys(UserInput.getKeys());
     }
 
-    /**
-     * Verifies a users authentication parameters
-     * @param authentication the authentication parameters provided by the user
-     * @return true if the user authenticated successfully, false otherwise
-     */
-    private boolean authenticateUser(String authentication){
-        return true;
-    }
 }

@@ -1,8 +1,7 @@
-package bu.COVIDApp.Database;
+package bu.COVIDApp.Database.SQLKeySet;
 
 import javax.persistence.*;
 
-//TODO: Make these db components modular. Might not become clear how to do this until we start making the KV Bloom Filter db
 /**
  * An entity representing the database schema for the schema that stores key,timestamp pairs in an sql database
  */

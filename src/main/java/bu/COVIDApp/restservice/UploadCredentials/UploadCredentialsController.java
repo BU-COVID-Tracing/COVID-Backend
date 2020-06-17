@@ -1,4 +1,4 @@
-package bu.COVIDApp.restservice;
+package bu.COVIDApp.restservice.UploadCredentials;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

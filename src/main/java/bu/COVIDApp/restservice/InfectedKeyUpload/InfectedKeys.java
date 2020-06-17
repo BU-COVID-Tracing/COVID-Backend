@@ -1,7 +1,9 @@
 package bu.COVIDApp.restservice.InfectedKeyUpload;
 
-import java.util.ArrayList;
 
+/**
+ * An object representing one key. This is the information that is stored in the database
+ */
 public class InfectedKeys {
     private String chirp;
     private String time;
