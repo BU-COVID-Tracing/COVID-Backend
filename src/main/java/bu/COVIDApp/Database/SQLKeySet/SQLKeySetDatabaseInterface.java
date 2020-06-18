@@ -29,6 +29,7 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
     @Override
     public RegistryGetResponse getKeys() {
         //TODO: Check for null response from findAll
+        //TODO: This should actually be a range query over a certain number of days
         ArrayList<KeySetData> myData = (ArrayList<KeySetData>)keyReg.findAll();
         return new RegistryGetResponse(myData);
     }
