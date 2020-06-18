@@ -4,6 +4,9 @@
 # Target file
 target/
 
+# Database credentials
+src/main/resources/application.properties
+
 # Log file
 *.log
 
