@@ -1,8 +1,8 @@
 package bu.COVIDApp.Database;
 
 import bu.COVIDApp.CovidBackendApplication;
-import bu.COVIDApp.Database.SQLKeySet.KeySetRegistryInterface;
-import bu.COVIDApp.Database.BloomFilterKV.KeyValBloomFilterRegistryDatabase;
+import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
+import bu.COVIDApp.Database.BloomFilterKV.BloomFilterKVDatabaseInterface;
 import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKeys;
 
@@ -33,10 +33,10 @@ public abstract class DatabaseInterface {
 
         switch (CovidBackendApplication.myRunMode){
             case SQLKeySet:
-                myInterface = new KeySetRegistryInterface();
+                myInterface = new SQLKeySetDatabaseInterface();
                 break;
             case BloomFilterKV:
-                myInterface = new KeyValBloomFilterRegistryDatabase();
+                myInterface = new BloomFilterKVDatabaseInterface();
                 break;
             default:
                 //This should never happen. Error should be reported when starting the application if a run mode was not selected

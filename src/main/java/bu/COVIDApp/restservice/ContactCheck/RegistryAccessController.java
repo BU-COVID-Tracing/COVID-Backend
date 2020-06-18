@@ -15,7 +15,7 @@ public class RegistryAccessController {
 
     @Autowired
     //TODO: Find a way to initialize the interfaces such that spring knows about them and can autowire the database objects
-    @Qualifier("keySetRegistryInterface")
+    @Qualifier("SQLKeySetDatabaseInterface")
     private DatabaseInterface myInterface;
 
     RegistryAccessController(){

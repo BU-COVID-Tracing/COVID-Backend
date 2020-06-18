@@ -19,7 +19,7 @@ public class InfectedKeyUploadController {
      * Handles uploading keys to whatever database is being used to store them
      */
     //TODO: Find a way to initialize the interfaces such that spring knows about them and can autowire the database objects
-    @Qualifier("keySetRegistryInterface")
+    @Qualifier("SQLKeySetDatabaseInterface")
     @Autowired
     private DatabaseInterface myInterface;
 

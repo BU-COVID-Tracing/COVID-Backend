@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 
 @Service
-public class KeySetRegistryInterface extends DatabaseInterface {
+public class SQLKeySetDatabaseInterface extends DatabaseInterface {
     @Autowired
     private KeySetRegistry keyReg;
 
