@@ -3,6 +3,7 @@ package bu.COVIDApp.Database;
 import bu.COVIDApp.CovidBackendApplication;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
 import bu.COVIDApp.Database.BloomFilterKV.BloomFilterKVDatabaseInterface;
+import bu.COVIDApp.restservice.AppContext;
 import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKeys;
 
@@ -33,7 +34,8 @@ public abstract class DatabaseInterface {
 
         switch (CovidBackendApplication.myRunMode){
             case SQLKeySet:
-                myInterface = new SQLKeySetDatabaseInterface();
+                //This is equivalent to newing the object but tells spring about it so that the sql database can be autowired
+                myInterface = AppContext.getContext().getBean(SQLKeySetDatabaseInterface.class);
                 break;
             case BloomFilterKV:
                 myInterface = new BloomFilterKVDatabaseInterface();

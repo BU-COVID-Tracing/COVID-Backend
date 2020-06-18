@@ -13,13 +13,13 @@ import java.util.ArrayList;
 @Controller
 public class RegistryAccessController {
 
-    @Autowired
-    //TODO: Find a way to initialize the interfaces such that spring knows about them and can autowire the database objects
-    @Qualifier("SQLKeySetDatabaseInterface")
-    private DatabaseInterface myInterface;
+    /**
+     * Used for interacting with data that is stored on whichever database the current scheme uses
+     */
+    private final DatabaseInterface myInterface;
 
     RegistryAccessController(){
-//        this.myInterface = DatabaseInterface.InterfaceInitializer();
+        this.myInterface = DatabaseInterface.InterfaceInitializer();
     }
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked

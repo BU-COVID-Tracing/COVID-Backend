@@ -16,7 +16,10 @@ public class CovidBackendApplication {
 		BloomFilterKV
 	}
 
+	//TODO: Make it so that strategies that don't require a SQL database don't require valid sql credentials for a valid SQL database
+	//		This is happening because spring is still trying to create a KeySetRegistry even though we aren't using it.
 	public static runMode myRunMode;
+
 
 	public static void main(String[] args) {
         try{

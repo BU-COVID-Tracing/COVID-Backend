@@ -18,10 +18,7 @@ public class InfectedKeyUploadController {
      * An uploader specific to the currently selected backend runMode.
      * Handles uploading keys to whatever database is being used to store them
      */
-    //TODO: Find a way to initialize the interfaces such that spring knows about them and can autowire the database objects
-    @Qualifier("SQLKeySetDatabaseInterface")
-    @Autowired
-    private DatabaseInterface myInterface;
+    private final DatabaseInterface myInterface;
 
     /**
      * @param myReg an instance of KeySetRegistry that will be auto instantiated by spring boot for use by the key set uploader
