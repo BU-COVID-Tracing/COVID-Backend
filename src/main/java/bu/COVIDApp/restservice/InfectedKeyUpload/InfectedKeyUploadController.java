@@ -1,10 +1,8 @@
 package bu.COVIDApp.restservice.InfectedKeyUpload;
 
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.Database.SQLKeySet.KeySetRegistry;
+import bu.COVIDApp.Database.SQLKeySet.SQLKeySetRegistry;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +21,7 @@ public class InfectedKeyUploadController {
     /**
      * @param myReg an instance of KeySetRegistry that will be auto instantiated by spring boot for use by the key set uploader
      */
-    InfectedKeyUploadController(KeySetRegistry myReg){
+    InfectedKeyUploadController(SQLKeySetRegistry myReg){
         this.myInterface = DatabaseInterface.InterfaceInitializer();
     }
 
@@ -34,8 +32,7 @@ public class InfectedKeyUploadController {
      * TODO: Add some credential check to this
      */
     @PostMapping()
-    public @ResponseBody boolean PostInfectedKey(@RequestBody List<InfectedKeys> myKeys) {
-        this.myInterface.addKeys(myKeys);
-        return this.myInterface.uploadKeys();
+    public @ResponseBody boolean PostInfectedKey(@RequestBody List<InfectedKey> myKeys) {
+        return this.myInterface.uploadKeys(myKeys);
     }
 }

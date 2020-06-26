@@ -1,13 +1,13 @@
-package bu.COVIDApp.Database.BloomFilterKV;
+package bu.COVIDApp.Database.KVBloomFilter;
 
 import bu.COVIDApp.Database.DatabaseInterface;
 import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
-import org.springframework.stereotype.Service;
+import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
+import java.util.List;
 
-@Service
-public class BloomFilterKVDatabaseInterface extends DatabaseInterface {
+public class KVBloomFilterDatabaseInterface extends DatabaseInterface {
     //TODO: Might be better to set these parameters at launch time rather than hard coding
     private final int HASH_CEILING = 2048;
     private final int NUM_HASHES = 3;
@@ -15,18 +15,26 @@ public class BloomFilterKVDatabaseInterface extends DatabaseInterface {
     //How many bits should be stored at each key in the kv store (i.e. how many bits of the bloom filter at each key)
     private final int BUCKET_SIZE = 8;
 
+    /**
+     * The user should pass in a bloom filter that was calculated on the client side and this filter should be XORed with
+     * the current filter
+     * @return true if the update was successfully made, false otherwise
+     */
     @Override
-    public boolean uploadKeys() {
+    public boolean uploadKeys(List<InfectedKey> myKeys) {
         return false;
     }
 
+    /**
+     * @return
+     */
     @Override
-    public RegistryGetResponse getKeys() {
+    public RegistryGetResponse getData() {
         return null;
     }
 
     @Override
-    public Boolean checkKeys(ArrayList<Object> myKeys) {
+    public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
         return null;
     }
 

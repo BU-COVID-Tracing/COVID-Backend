@@ -13,6 +13,7 @@ public class CovidBackendApplication {
 	 */
     public enum runMode{
     	SQLKeySet,
+		SQLBloomFilter,
 		BloomFilterKV
 	}
 
@@ -25,8 +26,9 @@ public class CovidBackendApplication {
         try{
      		myRunMode = runMode.valueOf(args[0]);
 		}catch(Exception e){
-            System.out.println("Please specify a valid run mode (SQLKeySet,BloomFilterKV) with the following flag -Dspring-boot.run.arguments=\"YourRunMode\"");
-            return;
+        	myRunMode = runMode.SQLKeySet;
+            System.out.println("No run mode specified. Defaulting to SQLKeySet. Choose an alternate run mode" +
+					" with the following flag -Dspring-boot.run.arguments=\"YourRunMode\"");
 		}
 
 		SpringApplication.run(CovidBackendApplication.class, args);

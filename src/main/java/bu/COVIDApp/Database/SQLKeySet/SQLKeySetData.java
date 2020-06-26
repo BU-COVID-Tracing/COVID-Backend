@@ -6,22 +6,22 @@ import javax.persistence.*;
  * An entity representing the database schema for the schema that stores key,timestamp pairs in an sql database
  */
 @Entity
-@Table(name="key_store")
-public class KeySetData {
+@Table(name="SQLKeySet")
+public class SQLKeySetData {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
 
-    @Column(name = "chirp")
+    @Column(name = "myChirp")
     private String chirp;
 
     //TODO: Make this an actual sql timestamp type
-    @Column(name = "time")
+    @Column(name = "myTime")
     private String time;
 
-    public KeySetData(){}
+    public SQLKeySetData(){}
 
-    public KeySetData(String chirp,String time){
+    public SQLKeySetData(String chirp, String time){
         this.chirp = chirp;
         this.time = time;
     }

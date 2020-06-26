@@ -1,29 +1,20 @@
 package bu.COVIDApp.Database;
 
 import bu.COVIDApp.CovidBackendApplication;
+import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterDatabaseInterface;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
-import bu.COVIDApp.Database.BloomFilterKV.BloomFilterKVDatabaseInterface;
-import bu.COVIDApp.restservice.AppContext;
+import bu.COVIDApp.Database.KVBloomFilter.KVBloomFilterDatabaseInterface;
 import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKeys;
+import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public abstract class DatabaseInterface {
-    protected LinkedList<InfectedKeys> uploadKeys;
 
     //////////////////
     //Initialization//
     //////////////////
-
-    /**
-     * The default constructor will be called when the uploader is @Autowired in the InfectedKeyUploadController
-     */
-    public DatabaseInterface(){
-        this.uploadKeys = new LinkedList<>();
-    }
 
     /**
      * Initialize the relevant DatabaseInterface child based on the value of CovidAppApplication.myRunMode
@@ -34,16 +25,21 @@ public abstract class DatabaseInterface {
 
         switch (CovidBackendApplication.myRunMode){
             case SQLKeySet:
-                //This is equivalent to newing the object but tells spring about it so that the sql database can be autowired
-                myInterface = AppContext.getContext().getBean(SQLKeySetDatabaseInterface.class);
+                myInterface = new SQLKeySetDatabaseInterface();
+                break;
+            case SQLBloomFilter:
+                myInterface = new SQLBloomFilterDatabaseInterface();
                 break;
             case BloomFilterKV:
-                myInterface = new BloomFilterKVDatabaseInterface();
+                myInterface = new KVBloomFilterDatabaseInterface();
                 break;
             default:
                 //This should never happen. Error should be reported when starting the application if a run mode was not selected
-                System.out.println("A get to contactCheck request was made but a run mode has not been selected");
-                System.exit(1);
+//                System.out.println("A get to contactCheck request was made but a run mode has not been selected");
+//                System.exit(1);
+                //TODO: This should not need a default option. Figure out why packaging is crashing here
+                myInterface = new SQLKeySetDatabaseInterface();
+                break;
         }
 
         return myInterface;
@@ -54,18 +50,10 @@ public abstract class DatabaseInterface {
     ///////////////
 
     /**
-     * Add a list of keys to the keys to be uploaded
-     * @param myKeys the keys you would like to be uploaded on the next call of uploadKeys
-     */
-    public void addKeys(List<InfectedKeys> myKeys){
-        this.uploadKeys.addAll(myKeys);
-    }
-
-    /**
-     * Uploads the keys to the registry in the form required for that specific dbSchema
+     * @param myKeys uploads all of the keys contained in myKeys to the db
      * @return true if the upload completed successfully. False otherwise
      */
-     public abstract boolean uploadKeys();
+     public abstract boolean uploadKeys(List<InfectedKey> myKeys);
 
     /////////////////
     //Key Downloads//
@@ -75,14 +63,14 @@ public abstract class DatabaseInterface {
      * Retrieves an object(depends on the accessor) from the DB (or uses a cached local copy) for the user so that they
      * can check for potential contact on their local device
      */
-    public abstract RegistryGetResponse getKeys();
+    public abstract RegistryGetResponse getData();
 
     /**
      * Does a check on the server(here) and returns boolean letting the user know if contact has been found or not
      * @param myKeys A list of keys to check against your local version of the registry
      * @return true if a matching key was found, false otherwise
      */
-    public abstract Boolean checkKeys(ArrayList<Object> myKeys);
+    public abstract Boolean checkKeys(ArrayList<InfectedKey> myKeys);
 
 
 
