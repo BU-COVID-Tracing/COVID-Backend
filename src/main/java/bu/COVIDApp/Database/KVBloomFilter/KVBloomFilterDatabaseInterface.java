@@ -1,7 +1,7 @@
 package bu.COVIDApp.Database.KVBloomFilter;
 
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
+import bu.COVIDApp.Database.SQLKeySet.SQLKeySetResponse;
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class KVBloomFilterDatabaseInterface extends DatabaseInterface {
      * @return
      */
     @Override
-    public RegistryGetResponse getData() {
+    public SQLKeySetResponse getData() {
         return null;
     }
 

@@ -16,9 +16,10 @@ public class RegistryAccessController {
      */
     private final DatabaseInterface myInterface;
 
-    RegistryAccessController(){
+    public RegistryAccessController(){
         this.myInterface = DatabaseInterface.InterfaceInitializer();
     }
+
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked
      * as infected
@@ -27,8 +28,9 @@ public class RegistryAccessController {
      */
     @GetMapping("/contactCheck")
     //TODO: The return type should be some abstract object that can be implemented for each method
-    public @ResponseBody ArrayList<SQLKeySetData> getContactCheck (@RequestParam(value = "authentication", defaultValue = "") String authentication){
-        return myInterface.getData().getMyDataContainer();
+    //TODO: Handle null response here
+    public @ResponseBody Object getContactCheck (@RequestParam(value = "authentication", defaultValue = "") String authentication){
+        return myInterface.getData();
     }
 
     /**

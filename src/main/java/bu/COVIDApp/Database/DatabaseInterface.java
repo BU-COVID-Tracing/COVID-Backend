@@ -4,7 +4,6 @@ import bu.COVIDApp.CovidBackendApplication;
 import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterDatabaseInterface;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
 import bu.COVIDApp.Database.KVBloomFilter.KVBloomFilterDatabaseInterface;
-import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ public abstract class DatabaseInterface {
      * Retrieves an object(depends on the accessor) from the DB (or uses a cached local copy) for the user so that they
      * can check for potential contact on their local device
      */
-    public abstract RegistryGetResponse getData();
+    public abstract Object getData();
 
     /**
      * Does a check on the server(here) and returns boolean letting the user know if contact has been found or not

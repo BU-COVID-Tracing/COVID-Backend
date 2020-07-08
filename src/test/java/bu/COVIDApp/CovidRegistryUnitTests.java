@@ -1,11 +1,8 @@
 package bu.COVIDApp;
 
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
-import net.bytebuddy.dynamic.scaffold.MethodGraph;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;

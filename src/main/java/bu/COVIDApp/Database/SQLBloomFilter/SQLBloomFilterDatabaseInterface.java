@@ -2,9 +2,7 @@ package bu.COVIDApp.Database.SQLBloomFilter;
 
 import bu.COVIDApp.BloomFilter;
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.Database.SQLKeySet.SQLKeySetRegistry;
 import bu.COVIDApp.restservice.AppContext;
-import bu.COVIDApp.restservice.ContactCheck.RegistryGetResponse;
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
@@ -28,8 +26,9 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
 
     @Override
     //TODO: This function will create concurrency issues if multiple threads/machines are accessing the db
-    //      The SQL opperations here should be a transaction that rollsback and tries again if an update was made while processing
-    public boolean uploadKeys(List<InfectedKey> myKeys) {
+    //      The SQL operations here should be a transaction that rollsback and tries again if an update was made while processing
+    //      Can also lock entries as a temporary solution with a lock column
+    public boolean uploadKeys(List<InfectedKey> myKeys){
         //Update your local copy of the bloom filter with what is stored on the db
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
         this.bloomFilter = new BloomFilter(myData);
@@ -50,12 +49,10 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
      * @return
      */
     @Override
-    public RegistryGetResponse getData() {
+    public Object getData() {
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
         this.bloomFilter = new BloomFilter(myData);
-
-        //TODO: Make it so that this function can return multiple types of data
-        return new RegistryGetResponse(this.bloomFilter);
+        return new SQLBloomFilterResponse(this.bloomFilter,0);
     }
 
     @Override

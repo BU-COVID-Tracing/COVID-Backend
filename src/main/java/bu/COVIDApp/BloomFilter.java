@@ -11,10 +11,12 @@ import java.util.List;
 public class BloomFilter {
 
     //TODO: Might be better to set these parameters at launch time rather than hard coding
+    //Should do some math to determine good values for these parameters
     private final int HASH_CEILING = 2048;
     private final int NUM_HASHES = 3;
     private final int BYTE_SIZE = 8;
 
+    //Might be better to store only non-zero indices
     private byte[] filterData;
 
     public BloomFilter(){
@@ -41,7 +43,7 @@ public class BloomFilter {
 
     /**
      * Insert a list of keys into the bloomFilter
-     * @param myData The data you want to insert into your bloom fitler
+     * @param myData The data you want to insert into your bloom filter
      * @return A HashSet of the bins that have been updated
      */
     public HashSet<Integer> insert(List<InfectedKey> myData){

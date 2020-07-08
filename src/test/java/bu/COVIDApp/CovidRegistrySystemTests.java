@@ -1,7 +1,6 @@
 package bu.COVIDApp;
 
 import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKeyUploadController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CovidRegistrySystemTests {
-
 
 	@Autowired
 	private CovidBackendApplication controller;
