@@ -16,13 +16,15 @@ public class InfectedKeyUploadController {
      * An uploader specific to the currently selected backend runMode.
      * Handles uploading keys to whatever database is being used to store them
      */
-    private final DatabaseInterface myInterface;
+    private DatabaseInterface myInterface;
 
     /**
-     * @param myReg an instance of KeySetRegistry that will be auto instantiated by spring boot for use by the key set uploader
+     * Tells the post mapping if this is the first post call since initialization. If it is, initialize my interface
      */
-    InfectedKeyUploadController(SQLKeySetRegistry myReg){
-        this.myInterface = DatabaseInterface.InterfaceInitializer();
+    private boolean initialized;
+
+    InfectedKeyUploadController(){
+        this.initialized = false;
     }
 
     /**
@@ -33,6 +35,14 @@ public class InfectedKeyUploadController {
      */
     @PostMapping()
     public @ResponseBody boolean PostInfectedKey(@RequestBody List<InfectedKey> myKeys) {
+        //Some issue with the order of object creation requires that this happen here rather than in the constructor
+        //Trying to initialize in the constructor leads to a nullptr even though interface initializer is a static function
+        //This issue only appears when trying to package the program and run from a jar file
+        if(!initialized){
+            this.myInterface = DatabaseInterface.InterfaceInitializer();
+            this.initialized = true;
+        }
+
         return this.myInterface.uploadKeys(myKeys);
     }
 }

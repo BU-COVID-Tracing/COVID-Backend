@@ -52,7 +52,8 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
     public Object getData() {
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
         this.bloomFilter = new BloomFilter(myData);
-        return new SQLBloomFilterResponse(this.bloomFilter,0);
+        SQLBloomFilterResponse response= new SQLBloomFilterResponse(this.bloomFilter,0);
+        return response.getDataContainer();
     }
 
     @Override

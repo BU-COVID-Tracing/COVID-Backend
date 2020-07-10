@@ -2,15 +2,33 @@ package bu.COVIDApp.Database.SQLBloomFilter;
 
 
 import bu.COVIDApp.BloomFilter;
-import com.sun.tools.javac.util.Pair;
 
 import java.util.LinkedList;
 
 
 public class SQLBloomFilterResponse {
 
+    //A class that represents an index value pair in a bloom filter
+    private class indexValue{
+        private int index;
+        private byte value;
 
-    private LinkedList<Pair<Byte,Integer>> myData;
+        public indexValue(int index,byte value){
+            this.index = index;
+            this.value = value;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public byte getValue() {
+            return value;
+        }
+
+    }
+
+    private LinkedList<indexValue> myData;
 
     /**
      * @param bf The bloom filter to generate the response from
@@ -24,10 +42,10 @@ public class SQLBloomFilterResponse {
         //Store all indices that are not zero in myData
         for(int ii = 0; ii < data.length;ii++)
             if(data[ii] != 0)
-                myData.add(new Pair<>(data[ii],ii));
+                myData.add(new indexValue(ii,data[ii]));
     }
 
-    public LinkedList<Pair<Byte,Integer>> getDataContainer() {
+    public LinkedList<indexValue> getDataContainer() {
         return myData;
     }
 }
