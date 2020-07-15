@@ -27,7 +27,7 @@
 --data-raw ''`
 
 ### Building The Docker Image (This image will be hosted somewhere soon)
-* With the proper dependencies installed, run mvn clean package. This will create a tar file in the target folder
+* With the proper dependencies installed, run mvn clean package. This will create a jar file in the target folder
 * Run `docker build -t "covid-backend:OCDockerfile" .` to create the docker image
 
 ### Running From Docker
