@@ -20,7 +20,7 @@ public abstract class DatabaseInterface {
      * @return An instantiated child class of DatabaseInterface
      */
     public static DatabaseInterface InterfaceInitializer(){
-        DatabaseInterface myInterface = null;
+        DatabaseInterface myInterface;
 
         switch (CovidBackendApplication.myRunMode){
             case SQLKeySet:
