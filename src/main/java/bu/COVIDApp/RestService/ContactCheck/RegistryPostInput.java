@@ -1,6 +1,6 @@
-package bu.COVIDApp.restservice.ContactCheck;
+package bu.COVIDApp.RestService.ContactCheck;
 
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 

@@ -1,7 +1,7 @@
 package bu.COVIDApp.Database.SQLBloomFilter;
 
 
-import bu.COVIDApp.BloomFilter;
+import bu.COVIDApp.Auxiliary.BloomFilter;
 
 import java.util.LinkedList;
 

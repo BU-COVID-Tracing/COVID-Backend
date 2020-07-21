@@ -2,7 +2,7 @@ package bu.COVIDApp.Database.KVBloomFilter;
 
 import bu.COVIDApp.Database.DatabaseInterface;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetResponse;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.List;

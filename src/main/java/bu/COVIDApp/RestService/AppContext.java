@@ -1,4 +1,4 @@
-package bu.COVIDApp.restservice;
+package bu.COVIDApp.RestService;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

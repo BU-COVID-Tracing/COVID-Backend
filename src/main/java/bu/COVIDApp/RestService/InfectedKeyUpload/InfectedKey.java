@@ -1,4 +1,4 @@
-package bu.COVIDApp.restservice.InfectedKeyUpload;
+package bu.COVIDApp.RestService.InfectedKeyUpload;
 
 
 /**

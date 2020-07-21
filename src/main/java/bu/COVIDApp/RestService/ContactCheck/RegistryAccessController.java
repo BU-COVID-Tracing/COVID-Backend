@@ -1,11 +1,8 @@
-package bu.COVIDApp.restservice.ContactCheck;
+package bu.COVIDApp.RestService.ContactCheck;
 
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.Database.SQLKeySet.SQLKeySetData;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 
 @Controller

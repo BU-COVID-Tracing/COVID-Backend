@@ -38,6 +38,7 @@ random.seed(time.time())
 time.sleep(random.uniform(0, 1))
 random.seed(time.time())
 dbPassword = str(random.randint(0, sys.maxsize))
+print("Database Password: ",dbPassword)
 
 dbPasswordVar = " --spring.datasource.password=" + dbPassword 
 dbUser = " --spring.datasource.username=root"
@@ -49,7 +50,9 @@ os.popen("docker network create --driver bridge covid-net")
 # Decide which database should be spun up based on the run mode of the backend
 if selection is optionsList[0] or optionsList[1]:
     dbContainerID = os.popen("docker run -d -p 3306:3306 --network covid-net --name=covid-registry -e MYSQL_ROOT_PASSWORD=" + dbPassword + " mysql").read()
-    time.sleep(5) # Give time for the database to initialize before launching the backend
+
+    # Should try to do a check to see if the db is running rather than just sleeping
+    time.sleep(10) # Give time for the database to initialize before launching the backend
 
     #TODO: Substitute the location of the hosted image once it is up
     os.popen("docker run -p 8080:8080 -dit --name=covid-backend --network covid-net covid-backend:OCDockerfile " + selection + dbPasswordVar + dbUser + dbURL)

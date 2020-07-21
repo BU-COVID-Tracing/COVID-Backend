@@ -1,4 +1,4 @@
-package bu.COVIDApp.restservice.ContactCheck;
+package bu.COVIDApp.RestService.ContactCheck;
 
 public class RegistryPostResponse {
     private boolean keyFound;

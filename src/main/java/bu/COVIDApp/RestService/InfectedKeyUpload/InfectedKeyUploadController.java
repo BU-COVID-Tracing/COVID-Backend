@@ -1,7 +1,6 @@
-package bu.COVIDApp.restservice.InfectedKeyUpload;
+package bu.COVIDApp.RestService.InfectedKeyUpload;
 
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.Database.SQLKeySet.SQLKeySetRegistry;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

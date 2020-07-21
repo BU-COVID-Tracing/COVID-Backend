@@ -1,9 +1,9 @@
 package bu.COVIDApp.Database.SQLBloomFilter;
 
-import bu.COVIDApp.BloomFilter;
+import bu.COVIDApp.Auxiliary.BloomFilter;
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.restservice.AppContext;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.AppContext;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,21 +25,20 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
     }
 
     @Override
-    //TODO: This function will create concurrency issues if multiple threads/machines are accessing the db
-    //      The SQL operations here should be a transaction that rollsback and tries again if an update was made while processing
-    //      Can also lock entries as a temporary solution with a lock column
     public boolean uploadKeys(List<InfectedKey> myKeys){
         //Update your local copy of the bloom filter with what is stored on the db
-        ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
-        this.bloomFilter = new BloomFilter(myData);
-
+        final int BYTE_SIZE = 8;
         //Add the new keys to the filter
-        HashSet<Integer> updatedBins = this.bloomFilter.insert(myKeys);
+        HashSet<Integer> updatedIndices = this.bloomFilter.insert(myKeys);
 
-        byte[] BFilter = this.bloomFilter.getFilterData();
+        for(Integer bfIndex:updatedIndices){
+            byte mask = (byte)(BYTE_SIZE - 1 - (bfIndex%BYTE_SIZE));
+            int bucket = bfIndex/BUCKET_SIZE_BYTES;
 
-        for(Integer index:updatedBins)
-            keyReg.save(new SQLBloomFilterData(index,BFilter[index]));
+            // TOOD: I think collecting these for a bit and batching many together at once may be a better approach to this
+            //Update the indices required in the database
+            keyReg.updateBloomFilter(bucket,mask,-1);
+        }
 
         return true;
     }

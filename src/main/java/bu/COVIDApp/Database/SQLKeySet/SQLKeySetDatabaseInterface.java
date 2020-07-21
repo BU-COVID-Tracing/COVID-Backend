@@ -1,8 +1,8 @@
 package bu.COVIDApp.Database.SQLKeySet;
 
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.restservice.AppContext;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.AppContext;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,13 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
 
     @Override
     public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
-        return null;
+        ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
+        for(InfectedKey key:myKeys){
+            SQLKeySetData compareValue = new SQLKeySetData(key);
+            if(myData.contains(compareValue))
+                return true;
+        }
+
+        return false;
     }
 }

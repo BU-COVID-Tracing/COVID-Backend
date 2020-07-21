@@ -1,8 +1,7 @@
-package bu.COVIDApp;
+package bu.COVIDApp.Auxiliary;
 
 import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterData;
-import bu.COVIDApp.Database.SQLKeySet.SQLKeySetRegistry;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,7 +43,7 @@ public class BloomFilter {
     /**
      * Insert a list of keys into the bloomFilter
      * @param myData The data you want to insert into your bloom filter
-     * @return A HashSet of the bins that have been updated
+     * @return A HashSet of the INDICES that have been set
      */
     public HashSet<Integer> insert(List<InfectedKey> myData){
         HashSet<Integer> returnSet = new HashSet<>();
@@ -52,10 +51,13 @@ public class BloomFilter {
         for(InfectedKey key:myData){
             for(int ii = 0; ii < NUM_HASHES;ii++){
                 int hash = keyHash(key.getChirp(),ii);
+                byte beforeChanges = filterData[hash/BYTE_SIZE];
                 //Index into the group of 8 bits that you need to update. Set the relevant bit in that group
                 byte mask = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
                 filterData[hash/BYTE_SIZE] = (byte)(filterData[hash/BYTE_SIZE] | (1 << mask));
-                returnSet.add(hash/BYTE_SIZE);
+
+                if(filterData[hash/BYTE_SIZE] != beforeChanges)
+                    returnSet.add(hash);
             }
         }
 

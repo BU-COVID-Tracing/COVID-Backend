@@ -1,6 +1,7 @@
 package bu.COVIDApp;
 
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.Auxiliary.BloomFilter;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;

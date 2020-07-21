@@ -4,7 +4,7 @@ import bu.COVIDApp.CovidBackendApplication;
 import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterDatabaseInterface;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
 import bu.COVIDApp.Database.KVBloomFilter.KVBloomFilterDatabaseInterface;
-import bu.COVIDApp.restservice.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.List;

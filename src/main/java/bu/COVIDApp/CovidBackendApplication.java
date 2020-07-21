@@ -21,7 +21,6 @@ public class CovidBackendApplication {
 	//		This is happening because spring is still trying to create a KeySetRegistry even though we aren't using it.
 	public static runMode myRunMode = runMode.SQLKeySet;
 
-
 	public static void main(String[] args) {
         try{
      		myRunMode = runMode.valueOf(args[0]);
@@ -32,5 +31,4 @@ public class CovidBackendApplication {
 
 		SpringApplication.run(CovidBackendApplication.class, args);
 	}
-
 }

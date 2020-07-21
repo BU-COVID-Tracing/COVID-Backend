@@ -1,5 +1,7 @@
 package bu.COVIDApp.Database.SQLKeySet;
 
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
+
 import javax.persistence.*;
 
 /**
@@ -24,6 +26,11 @@ public class SQLKeySetData {
     public SQLKeySetData(String chirp, String time){
         this.chirp = chirp;
         this.time = time;
+    }
+
+    public SQLKeySetData(InfectedKey data){
+        this.chirp = data.getChirp();
+        this.time = data.getTime();
     }
 
     public Integer getId() {
