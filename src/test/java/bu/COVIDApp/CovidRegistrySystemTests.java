@@ -56,14 +56,14 @@ class CovidRegistrySystemTests {
 
 		//Keys to check are found in the get
 		for(int ii = 0; ii < TEST_KEY_COUNT/2;ii++)
-			uploadKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),"1"));
+			uploadKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),1));
 
 		//These are the keys we will check are returned in the get request
 		LinkedList<InfectedKey> checkKeys = new LinkedList<>(uploadKeys);
 
 		//Add some other data
 		for(int ii = 0; ii < TEST_KEY_COUNT/2;ii++)
-			uploadKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),"1"));
+			uploadKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),1));
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("X-COM-PERSIST", "true");
@@ -80,7 +80,7 @@ class CovidRegistrySystemTests {
 
 		//Check that your response contains every key in check keys
 		for(InfectedKey key:checkKeys)
-			assertThat(getResponse.getBody().contains(key.getChirp()) && getResponse.getBody().contains(key.getTime()));
+			assertThat(getResponse.getBody().contains(key.getChirp()) && getResponse.getBody().contains(Integer.toString(key.getDay())));
 	}
 
 	/**

@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CovidBackendApplication {
 
+	final int EXPOSURE_PERIOD = 14; //The total number of days worth of data that should be stored at any given time
+									//After records are out of date they should be purged
+
+	int currentDay = 0;
+
 	/**
 	 * Describes which key storage strategy should be used
 	 */
@@ -17,8 +22,6 @@ public class CovidBackendApplication {
 		BloomFilterKV
 	}
 
-	//TODO: Make it so that schemas that don't require a SQL database don't require valid sql credentials for a valid SQL database
-	//		This is happening because spring is still trying to create a KeySetRegistry even though we aren't using it.
 	public static runMode myRunMode = runMode.SQLKeySet;
 
 	public static void main(String[] args) {

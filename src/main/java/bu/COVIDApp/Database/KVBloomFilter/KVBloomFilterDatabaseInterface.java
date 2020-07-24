@@ -33,6 +33,14 @@ public class KVBloomFilterDatabaseInterface extends DatabaseInterface {
         return null;
     }
 
+    /**
+     * @return
+     */
+    @Override
+    public SQLKeySetResponse getData(Integer day) {
+        return null;
+    }
+
     @Override
     public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
         return null;

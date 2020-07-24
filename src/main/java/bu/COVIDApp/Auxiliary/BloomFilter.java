@@ -4,13 +4,14 @@ import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterData;
 import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 public class BloomFilter {
 
     //TODO: Might be better to set these parameters at launch time rather than hard coding
-    //Should do some math to determine good values for these parameters
+    //TODO: Should do some math to determine good values for these parameters
     private final int HASH_CEILING = 2048;
     private final int NUM_HASHES = 3;
     private final int BYTE_SIZE = 8;
@@ -37,27 +38,34 @@ public class BloomFilter {
         //Put every item you get back in its correct place in the bloom filter
         //If an index is not found in the database it is assumed to be zero
         for(SQLBloomFilterData key:myData)
-            this.filterData[key.getIndex()] = key.getData();
+            this.filterData[key.getDayIndex().getIndex()] = key.getData();
     }
 
     /**
      * Insert a list of keys into the bloomFilter
      * @param myData The data you want to insert into your bloom filter
-     * @return A HashSet of the INDICES that have been set
+     * @return A Hashmap where keys are days and the values in the hash set that corresponds to each day is the updated indices for that bloom filter
      */
-    public HashSet<Integer> insert(List<InfectedKey> myData){
-        HashSet<Integer> returnSet = new HashSet<>();
+    public HashMap<Integer,HashSet<Integer>> insert(List<InfectedKey> myData){
+        HashMap<Integer,HashSet<Integer>> returnSet = new HashMap<>();
 
         for(InfectedKey key:myData){
+            //Add the set if it doesn't exist
+            if(!returnSet.containsKey(key.getDay()))
+                returnSet.put(key.getDay(),new HashSet<>());
+
             for(int ii = 0; ii < NUM_HASHES;ii++){
                 int hash = keyHash(key.getChirp(),ii);
-                byte beforeChanges = filterData[hash/BYTE_SIZE];
+
                 //Index into the group of 8 bits that you need to update. Set the relevant bit in that group
                 byte mask = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
                 filterData[hash/BYTE_SIZE] = (byte)(filterData[hash/BYTE_SIZE] | (1 << mask));
 
-                if(filterData[hash/BYTE_SIZE] != beforeChanges)
-                    returnSet.add(hash);
+                //TODO: Should OPTIMIZE by only uploading new changes but having multiple filters for multiple days
+                //      complicates things
+                //if(filterData[hash/BYTE_SIZE] != beforeChanges)
+
+                returnSet.get(key.getDay()).add(hash);
             }
         }
 

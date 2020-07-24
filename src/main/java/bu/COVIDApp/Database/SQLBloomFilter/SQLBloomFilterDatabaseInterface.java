@@ -6,6 +6,7 @@ import bu.COVIDApp.RestService.AppContext;
 import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,15 +30,17 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
         //Update your local copy of the bloom filter with what is stored on the db
         final int BYTE_SIZE = 8;
         //Add the new keys to the filter
-        HashSet<Integer> updatedIndices = this.bloomFilter.insert(myKeys);
+        HashMap<Integer,HashSet<Integer>> updatedIndices = this.bloomFilter.insert(myKeys);
+        System.out.println("KeyReg: " + keyReg);
 
-        for(Integer bfIndex:updatedIndices){
-            byte mask = (byte)(BYTE_SIZE - 1 - (bfIndex%BYTE_SIZE));
-            int bucket = bfIndex/BUCKET_SIZE_BYTES;
+        for (Integer day:updatedIndices.keySet()) {
+            for (Integer bfIndex :updatedIndices.get(day)) {
+                byte mask = (byte) (BYTE_SIZE - 1 - (bfIndex % BYTE_SIZE));
+                int bucket = bfIndex / BUCKET_SIZE_BYTES;
 
-            // TOOD: I think collecting these for a bit and batching many together at once may be a better approach to this
-            //Update the indices required in the database
-            keyReg.updateBloomFilter(bucket,mask,-1);
+                // TODO: I think collecting these for a bit and batching many together at once may be a better approach to this
+                keyReg.updateBloomFilter(bucket, mask, day);
+            }
         }
 
         return true;
@@ -49,7 +52,22 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
      */
     @Override
     public Object getData() {
+        //TODO: This doesn't need to happen every time. Should be a background thread that occasionally updates
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
+        this.bloomFilter = new BloomFilter(myData);
+        SQLBloomFilterResponse response= new SQLBloomFilterResponse(this.bloomFilter,0);
+        return response.getDataContainer();
+    }
+
+    /**
+     * Reconstructs a bloom filter from the db and returns it as a byte array
+     * @return
+     */
+    @Override
+    public Object getData(Integer day) {
+        //TODO: This doesn't need to happen every time. Should be a background thread that occasionally updates
+
+        ArrayList<SQLBloomFilterData> myData = keyReg.dayQuery(day);
         this.bloomFilter = new BloomFilter(myData);
         SQLBloomFilterResponse response= new SQLBloomFilterResponse(this.bloomFilter,0);
         return response.getDataContainer();
@@ -57,6 +75,7 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
 
     @Override
     public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
+        //TODO: This doesn't need to happen every time. Should be a background thread that occasionally updates
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
         this.bloomFilter = new BloomFilter(myData);
 

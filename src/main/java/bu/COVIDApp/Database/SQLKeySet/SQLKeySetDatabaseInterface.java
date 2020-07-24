@@ -18,18 +18,28 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
     @Override
     public boolean uploadKeys(List<InfectedKey> myKeys) {
         for(InfectedKey key:myKeys){
-            SQLKeySetData myData = new SQLKeySetData(key.getChirp(),key.getTime());
+            SQLKeySetData myData = new SQLKeySetData(key.getChirp(),key.getDay());
             keyReg.save(myData);
         }
 
         return true;
     }
 
+    /**
+     * Gets all data currently stored in the db. This should be CovidBackendApplication.EXPOSURE_PERIOD number of days
+     */
     @Override
     public SQLKeySetResponse getData() {
-        //TODO: Check for null response from findAll
-        //TODO: This should actually be a range query over a certain number of days
         ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
+        return new SQLKeySetResponse(myData);
+    }
+
+    /**
+     * Gets all of the keys associated with a particular day
+     */
+    @Override
+    public SQLKeySetResponse getData(Integer day) {
+        ArrayList<SQLKeySetData> myData = keyReg.dayQuery(day);
         return new SQLKeySetResponse(myData);
     }
 

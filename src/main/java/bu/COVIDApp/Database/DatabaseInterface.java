@@ -20,7 +20,7 @@ public abstract class DatabaseInterface {
      * @return An instantiated child class of DatabaseInterface
      */
     public static DatabaseInterface InterfaceInitializer(){
-        DatabaseInterface myInterface;
+        DatabaseInterface myInterface = null;
 
         switch (CovidBackendApplication.myRunMode){
             case SQLKeySet:
@@ -31,13 +31,6 @@ public abstract class DatabaseInterface {
                 break;
             case BloomFilterKV:
                 myInterface = new KVBloomFilterDatabaseInterface();
-                break;
-            default:
-                //This should never happen. Error should be reported when starting the application if a run mode was not selected
-//                System.out.println("A get to contactCheck request was made but a run mode has not been selected");
-//                System.exit(1);
-                //TODO: This should not need a default option. Figure out why packaging is crashing here
-                myInterface = new SQLKeySetDatabaseInterface();
                 break;
         }
 
@@ -63,6 +56,13 @@ public abstract class DatabaseInterface {
      * can check for potential contact on their local device
      */
     public abstract Object getData();
+
+    /**
+     * Retrieves an object(depends on the accessor) from the DB (or uses a cached local copy) for the user so that they
+     * can check for potential contact on their local device. This overload takes a day and only returns data relevant to a specific day
+     * @param day The day for which you would like to query keys
+     */
+    public abstract Object getData(Integer day);
 
     /**
      * Does a check on the server(here) and returns boolean letting the user know if contact has been found or not

@@ -33,7 +33,6 @@ while not selection:
             selection = optionsList[numInput]
 
 # Generate a random password for the db
-# This probably isn't secure enough for actual production use but is fine for testing
 random.seed(time.time())
 time.sleep(random.uniform(0, 1))
 random.seed(time.time())

@@ -6,11 +6,11 @@ package bu.COVIDApp.RestService.InfectedKeyUpload;
  */
 public class InfectedKey {
     private String chirp;
-    private String time;
+    private Integer day;
 
-    public InfectedKey(String chirp, String time) {
+    public InfectedKey(String chirp, Integer day) {
         this.chirp = chirp;
-        this.time = time;
+        this.day = day;
     }
 
     public String getChirp() {
@@ -21,11 +21,11 @@ public class InfectedKey {
         this.chirp = chirp;
     }
 
-    public String getTime() {
-        return time;
+    public Integer getDay() {
+        return day;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setDay(Integer day) {
+        this.day= day;
     }
 }

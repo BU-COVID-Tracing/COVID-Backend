@@ -17,20 +17,19 @@ public class SQLKeySetData {
     @Column(name = "myChirp")
     private String chirp;
 
-    //TODO: Make this an actual sql timestamp type
-    @Column(name = "myTime")
-    private String time;
+    @Column(name = "myDay")
+    private Integer day;
 
     public SQLKeySetData(){}
 
-    public SQLKeySetData(String chirp, String time){
+    public SQLKeySetData(String chirp,Integer day){
         this.chirp = chirp;
-        this.time = time;
+        this.day = day;
     }
 
     public SQLKeySetData(InfectedKey data){
         this.chirp = data.getChirp();
-        this.time = data.getTime();
+        this.day = data.getDay();
     }
 
     public Integer getId() {
@@ -49,11 +48,11 @@ public class SQLKeySetData {
         this.chirp = key;
     }
 
-    public String getTime() {
-        return time;
+    public Integer getDay() {
+        return day;
     }
 
-    public void setTime(String timestamp) {
-        this.time = timestamp;
+    public void setDay(Integer day) {
+        this.day = day;
     }
 }

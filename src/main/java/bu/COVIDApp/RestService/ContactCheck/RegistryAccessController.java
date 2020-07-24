@@ -19,15 +19,18 @@ public class RegistryAccessController {
 
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked
-     * as infected
-     * @param authentication a user id to prevent/punish repeated queries
+     * as infected. Return value will depend on scheme in use
+     * @param day the day you would like info for
      * @return The object that will be sent to the user and will allow them to determine if they have made contact with an infected user
      */
     @GetMapping("/contactCheck")
     //TODO: The return type should be some abstract object that can be implemented for each method
     //TODO: Handle null response here
-    public @ResponseBody Object getContactCheck (@RequestParam(value = "authentication", defaultValue = "") String authentication){
-        return myInterface.getData();
+    public @ResponseBody Object getContactCheck(@RequestParam(defaultValue = "-1") int day){
+        if(day == -1)
+            return myInterface.getData();
+        else
+            return myInterface.getData(day);
     }
 
     /**

@@ -27,7 +27,7 @@ class CovidRegistryUnitTests {
 
 		//Add a random key to the testKey set
 		for(int ii = 0; ii < TEST_KEY_COUNT;ii++)
-			testKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),"1"));
+			testKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),1));
 
 		myBF.insert(testKeys);
 
@@ -54,7 +54,7 @@ class CovidRegistryUnitTests {
 
 		//Add a random key to the testKey set
 		for(int ii = 0; ii < TEST_KEY_COUNT;ii++)
-			fillerKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),"1"));
+			fillerKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),1));
 
 		//Insert some random data into the filter
 		myBF.insert(fillerKeys);
@@ -62,7 +62,7 @@ class CovidRegistryUnitTests {
 		//Check that items that weren't put in the filter don't return true
 		LinkedList<InfectedKey> testKeys = new LinkedList<>();
 		for(int ii = 0;ii < TEST_KEY_COUNT/10;ii++){
-			InfectedKey newData  = new InfectedKey(Integer.toString(rand.nextInt()),"1");
+			InfectedKey newData  = new InfectedKey(Integer.toString(rand.nextInt()),1);
 
 			//If the key you've generated was one fo the filler keys, don't add it and perform an additional iteration
 			if(fillerKeys.contains(newData)){
@@ -95,7 +95,7 @@ class CovidRegistryUnitTests {
 			LinkedList<InfectedKey> testKeys = new LinkedList<>();
 			//Add a random key to the testKey set
 			for(int jj = 0; jj < KEYS_PER_THREAD;jj++)
-				testKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),"1"));
+				testKeys.add(new InfectedKey(Integer.toString(rand.nextInt()),1));
 
 			threadData.add(testKeys);
 		}
