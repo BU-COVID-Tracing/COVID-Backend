@@ -13,20 +13,27 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-const containerName = "MixNet"
+const clientPort = 8081
+const nodePort = 8082
 
-const msgStart = "$"
-const msgEnd = "$"
+const msgDelim = "+"
 
 const criticalMass = 10 //The critical mass of messages needed at a node before it forwards the messages onward (Each message contains 14 keys so this is 140 keys)
+const queryTime = 5 // How many seconds the system should wait before checking if it has achieved critical mass. Needs to acquire a lock on the dataSet map so shouldn't be too frequent
+
+const (
+	nodeConnection = true
+	clientConnection = false
+)
 
 type Node struct {
-	backendNodeIP  string
+	apiEndpoint    string
 	neighborNodeIP string
 	privKey        *rsa.PrivateKey
 	pubKey         rsa.PublicKey
@@ -38,9 +45,11 @@ type Node struct {
 }
 
 func main() {
+	fmt.Println("Node Started!")
+
 	//TODO: Should do some more thorough checks for proper formatting of args
 	if len(os.Args) != 3 {
-		log.Fatal("Please make sure that you pass 0 or 1 as the first arg and the address of the backend as the second arg")
+		log.Fatal("Please make sure your input is of the form \"{NeighborIP} {BackendIP}\"")
 	}
 
 	//Generate public and private keys
@@ -48,13 +57,12 @@ func main() {
 	errorCheck(err, "Failed to generate RSA Key", true)
 
 	node := Node{
-		backendNodeIP:  "http://" + os.Args[2] + "/InfectedKey",
-		neighborNodeIP: containerName + os.Args[1] + ":8081", //This is a container name at the moment which should be resolved by docker DNS
-		//neighborNodeIP: "localhost:8081",
-		privKey: privateKey,
-		pubKey:  privateKey.PublicKey,
-		dataSet: make(map[string]string),
-		mux:     &sync.Mutex{},
+		apiEndpoint:    "http://" + os.Args[2] + ":8080/InfectedKey",
+		neighborNodeIP: os.Args[1] + ":" + strconv.Itoa(nodePort),
+		privKey:        privateKey,
+		pubKey:         privateKey.PublicKey,
+		dataSet:        make(map[string]string),
+		mux:            &sync.Mutex{},
 	}
 
 	fmt.Println("PublicKey: ", node.pubKey)
@@ -82,23 +90,29 @@ func (node *Node) decryptMessage(encryptedString string) string {
 	return string(decryptedBytes)
 }
 
-//////////////////////////////
-// Node Connection Handling //
-//////////////////////////////
+////////////////////////////
+// Main Execution Threads //
+////////////////////////////
 
+/**
+ * A goroutine that checks every queryTime seconds to see if this node has hit a critical mass of messages which then means
+ * that all of the messages held by this node will be forwarded onward
+ * TODO: May be better to forward some percentage of the messages so that it becomes more difficult to trace a particular message
+ *       to a particular batch of messages
+ */
 func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
 		node.mux.Lock()
 		//If you've reached critical mass then send all of the data you have in a random order to the backend
-		if len(node.dataSet) == criticalMass {
+		if len(node.dataSet) >= criticalMass {
 			fmt.Println("Forwarding messages to next node")
 			//The order of iterations over maps in go is RANDOM but not every element is equally likely
 			//TODO: Make this more random than it currently is
 			for data, address := range node.dataSet {
 				//Post request if talking to backend, standard TCP message otherwise
-				if address == node.backendNodeIP {
+				if address == node.apiEndpoint {
 					resp, err := http.Post(address, "application/json", bytes.NewBuffer([]byte(data)))
 					errorCheck(err, "unable to write to backend", false)
 					fmt.Println("Backend Response: " + resp.Status)
@@ -109,16 +123,17 @@ func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 					_, err = outgoingConn.Write([]byte(data))
 					errorCheck(err, "Failed to write to neighbor node", true)
 
-					outgoingConn.Close()
+					err = outgoingConn.Close()
+					errorCheck(err,"Failed to close outgoing connection after dialing next node",true)
 				}
 
 			}
+			node.dataSet = make(map[string]string)
 		}
-		node.dataSet = make(map[string]string)
 
 		node.mux.Unlock()
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(queryTime * time.Second)
 	}
 }
 
@@ -128,33 +143,16 @@ func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 func (node *Node) nodeConnListen(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	ln, err := net.Listen("tcp", "localhost:8081")
+	ln, err := net.Listen("tcp", "localhost:" + strconv.Itoa(nodePort))
 	errorCheck(err, "Error accepting traffic from neighbor node", false)
 
 	for {
 		conn, err := ln.Accept()
 		errorCheck(err, "Error accepting neighbor node connection", false)
-		go node.handleNodeConnection(conn)
+		go node.handleConnecion(conn,nodeConnection)
 	}
 
 }
-
-func (node *Node) handleNodeConnection(incomingConn net.Conn) {
-	nodeMessage := readSocketData(incomingConn)
-	beg := strings.Index(nodeMessage, msgStart)
-	end := strings.Index(nodeMessage, msgEnd)
-	decryptedString := node.decryptMessage(nodeMessage[beg+len(msgStart) : end])
-
-	fmt.Println("Received Neighbor Message: " + decryptedString)
-
-	node.mux.Lock()
-	node.dataSet[decryptedString] = node.backendNodeIP
-	node.mux.Unlock()
-}
-
-////////////////////////////////
-// Client Connection Handling //
-////////////////////////////////
 
 /**
  * Listen for a client who wants to upload keys
@@ -162,26 +160,68 @@ func (node *Node) handleNodeConnection(incomingConn net.Conn) {
 func (node *Node) clientConnListen(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	ln, err := net.Listen("tcp", "localhost:8082")
+	ln, err := net.Listen("tcp", "localhost:" + strconv.Itoa(clientPort))
 	errorCheck(err, "Error accepting new client", false)
 
 	for {
 		conn, err := ln.Accept()
 		errorCheck(err, "Error accepting new client", false)
-		go node.handleClientConnection(conn)
+		go node.handleConnecion(conn,clientConnection)
 	}
 }
 
-func (node *Node) handleClientConnection(incomingConn net.Conn) {
-	clientMessage := readSocketData(incomingConn)
-	beg := strings.Index(clientMessage, msgStart)
-	end := strings.Index(clientMessage, msgEnd)
-	clientMessage = node.decryptMessage(clientMessage[beg+len(msgStart) : end])
-	fmt.Println("Received Client Message: " + clientMessage)
+
+
+/////////////////////////
+// Connection Handling //
+/////////////////////////
+
+func (node *Node) handleConnecion(incomingConn net.Conn,connectionType bool) {
+	fmt.Println("HANDLING CONNECTION")
+	message := readSocketData(incomingConn)
+	beg := strings.Index(message, msgDelim)
+	end := strings.LastIndex(message, msgDelim)
+	//message = node.decryptMessage(message[beg+len(msgStart) : end])
+	message = message[beg+len(msgDelim) : end]
+
+	fmt.Println("Received Message: " + message)
 
 	node.mux.Lock()
-	node.dataSet[clientMessage] = node.neighborNodeIP
+	if connectionType == nodeConnection{
+		node.dataSet[message] = node.apiEndpoint
+	}else if connectionType == clientConnection{
+		node.dataSet[message] = node.neighborNodeIP
+	}
 	node.mux.Unlock()
+}
+
+/**
+ * TODO: This is a bit messy and is likely breakable
+ */
+func readSocketData(incomingConn net.Conn) (returnString string) {
+	defer incomingConn.Close()
+
+ReadData:
+	for {
+		buf := make([]byte, 1024)
+		length, err := bufio.NewReader(incomingConn).Read(buf)
+		data := string(buf[:length])
+		returnString += data
+
+		switch err {
+		case io.EOF:
+			break ReadData
+		case nil:
+			if strings.HasSuffix(data, msgDelim) {
+				break ReadData
+			}
+		default:
+			log.Fatalf("Receive data failed:%s", err)
+			return returnString
+		}
+	}
+
+	return returnString
 }
 
 /////////////////////////
@@ -202,33 +242,4 @@ func errorCheck(err error, msg string, fatal bool) {
 			fmt.Println(msg)
 		}
 	}
-}
-
-/**
- * TODO: This is a bit messy and is likely breakable
- */
-func readSocketData(incomingConn net.Conn) (returnString string) {
-	defer incomingConn.Close()
-
-ReadData:
-	for {
-		buf := make([]byte, 1024)
-		length, err := bufio.NewReader(incomingConn).Read(buf)
-		data := string(buf[:length])
-		returnString += data
-
-		switch err {
-		case io.EOF:
-			break ReadData
-		case nil:
-			if strings.HasSuffix(data, "END") {
-				break ReadData
-			}
-		default:
-			log.Fatalf("Receive data failed:%s", err)
-			return returnString
-		}
-	}
-
-	return returnString
 }
