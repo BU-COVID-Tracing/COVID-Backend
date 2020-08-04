@@ -43,13 +43,13 @@ dbPasswordVar = " --spring.datasource.password=" + dbPassword
 dbUser = " --spring.datasource.username=root"
 dbURL = " --spring.datasource.url=jdbc:mysql://covid-registry:3306/registry?createDatabaseIfNotExist=true"
 
+#Create a network bridge 
+os.popen("docker network create --driver bridge covid-net")
 
 #Mix Network
 os.popen("docker run -p 8081:8081 -p 8082:8082 -dit --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node0 covid-backend")
 os.popen("docker run -p 8083:8081 -p 8084:8082 -dit --name=mix-net-node1 --network covid-net mix-net-node:latest mix-net-node1 covid-backend")
 
-#Create a network bridge 
-os.popen("docker network create --driver bridge covid-net")
 # Decide which database should be spun up based on the run mode of the backend. Some other key storage strategies may not use SQL Databases
 if selection is optionsList[0] or optionsList[1]:
     dbContainerID = os.popen("docker run -d -p 3306:3306 --network covid-net --name=covid-registry -e MYSQL_ROOT_PASSWORD=" + dbPassword + " mysql:latest").read()

@@ -24,11 +24,11 @@ const nodePort = 8082
 
 const msgDelim = "+"
 
-const criticalMass = 10 //The critical mass of messages needed at a node before it forwards the messages onward (Each message contains 14 keys so this is 140 keys)
-const queryTime = 5 // How many seconds the system should wait before checking if it has achieved critical mass. Needs to acquire a lock on the dataSet map so shouldn't be too frequent
+const criticalMass = 1 //The critical mass of messages needed at a node before it forwards the messages onward (Each message contains 14 keys so this is 140 keys)
+const queryTime = 5    // How many seconds the system should wait before checking if it has achieved critical mass. Needs to acquire a lock on the dataSet map so shouldn't be too frequent
 
 const (
-	nodeConnection = true
+	nodeConnection   = true
 	clientConnection = false
 )
 
@@ -98,12 +98,14 @@ func (node *Node) decryptMessage(encryptedString string) string {
  * A goroutine that checks every queryTime seconds to see if this node has hit a critical mass of messages which then means
  * that all of the messages held by this node will be forwarded onward
  * TODO: May be better to forward some percentage of the messages so that it becomes more difficult to trace a particular message
- *       to a particular batch of messages
+ *       to a particular batch of messages. Also probably a good idea to add a timeout so that messages do not get stuck if the buffer
+ *		 does not fill after some period of time
  */
 func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
+		fmt.Println(len(node.dataSet))
 		node.mux.Lock()
 		//If you've reached critical mass then send all of the data you have in a random order to the backend
 		if len(node.dataSet) >= criticalMass {
@@ -124,7 +126,7 @@ func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 					errorCheck(err, "Failed to write to neighbor node", true)
 
 					err = outgoingConn.Close()
-					errorCheck(err,"Failed to close outgoing connection after dialing next node",true)
+					errorCheck(err, "Failed to close outgoing connection after dialing next node", true)
 				}
 
 			}
@@ -143,13 +145,15 @@ func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
 func (node *Node) nodeConnListen(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	ln, err := net.Listen("tcp", "localhost:" + strconv.Itoa(nodePort))
+	ln, err := net.Listen("tcp", "localhost:"+strconv.Itoa(nodePort))
 	errorCheck(err, "Error accepting traffic from neighbor node", false)
+	fmt.Println("Passed listen for connections in node listen")
 
 	for {
 		conn, err := ln.Accept()
+		fmt.Println("Passed accept for connections in node listen")
 		errorCheck(err, "Error accepting neighbor node connection", false)
-		go node.handleConnecion(conn,nodeConnection)
+		go node.handleConnecion(conn, nodeConnection)
 	}
 
 }
@@ -160,23 +164,23 @@ func (node *Node) nodeConnListen(wg *sync.WaitGroup) {
 func (node *Node) clientConnListen(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	ln, err := net.Listen("tcp", "localhost:" + strconv.Itoa(clientPort))
+	ln, err := net.Listen("tcp", "localhost:"+strconv.Itoa(clientPort))
 	errorCheck(err, "Error accepting new client", false)
+	fmt.Println("Passed listen for connections")
 
 	for {
 		conn, err := ln.Accept()
+		fmt.Println("Accepted new connection")
 		errorCheck(err, "Error accepting new client", false)
-		go node.handleConnecion(conn,clientConnection)
+		go node.handleConnecion(conn, clientConnection)
 	}
 }
-
-
 
 /////////////////////////
 // Connection Handling //
 /////////////////////////
 
-func (node *Node) handleConnecion(incomingConn net.Conn,connectionType bool) {
+func (node *Node) handleConnecion(incomingConn net.Conn, connectionType bool) {
 	fmt.Println("HANDLING CONNECTION")
 	message := readSocketData(incomingConn)
 	beg := strings.Index(message, msgDelim)
@@ -187,9 +191,9 @@ func (node *Node) handleConnecion(incomingConn net.Conn,connectionType bool) {
 	fmt.Println("Received Message: " + message)
 
 	node.mux.Lock()
-	if connectionType == nodeConnection{
+	if connectionType == nodeConnection {
 		node.dataSet[message] = node.apiEndpoint
-	}else if connectionType == clientConnection{
+	} else if connectionType == clientConnection {
 		node.dataSet[message] = node.neighborNodeIP
 	}
 	node.mux.Unlock()
