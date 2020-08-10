@@ -1,36 +1,26 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	_ "crypto/sha256"
+	"encoding/json"
 	"fmt"
-	"io"
+	"github.com/gorilla/mux"
+	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
 
-const clientPort = 8081
-const nodePort = 8082
+const LISTEN_PORT = "8081"
 
-const msgDelim = "+"
-
-const criticalMass = 1 //The critical mass of messages needed at a node before it forwards the messages onward (Each message contains 14 keys so this is 140 keys)
+const criticalMass = 1 //The critical mass of messages needed at a node before it forwards the messages onward
 const queryTime = 5    // How many seconds the system should wait before checking if it has achieved critical mass. Needs to acquire a lock on the dataSet map so shouldn't be too frequent
-
-const (
-	nodeConnection   = true
-	clientConnection = false
-)
 
 type Node struct {
 	apiEndpoint    string
@@ -57,8 +47,8 @@ func main() {
 	errorCheck(err, "Failed to generate RSA Key", true)
 
 	node := Node{
-		apiEndpoint:    "http://" + os.Args[2] + ":8080/InfectedKey",
-		neighborNodeIP: os.Args[1] + ":" + strconv.Itoa(nodePort),
+		apiEndpoint:    "http://" + os.Args[2] + "/InfectedKey",
+		neighborNodeIP: "http://" + os.Args[1] + "/NodeTransfer",
 		privKey:        privateKey,
 		pubKey:         privateKey.PublicKey,
 		dataSet:        make(map[string]string),
@@ -69,15 +59,9 @@ func main() {
 
 	//Start a goroutines listening for clients/nodes
 
-	var wg sync.WaitGroup
-
-	wg.Add(3)
-	go node.nodeConnListen(&wg)
-	go node.clientConnListen(&wg)
-	go node.criticalMassDetect(&wg)
-
-	//Wait for goroutines to finish (They shouldn't so long as the node keeps running)
-	wg.Wait()
+	go node.criticalMassDetect()
+	node.handleRequests()
+	fmt.Println("Terminated")
 }
 
 //////////////////
@@ -86,7 +70,7 @@ func main() {
 
 func (node *Node) decryptMessage(encryptedString string) string {
 	decryptedBytes, err := node.privKey.Decrypt(nil, []byte(encryptedString), &rsa.OAEPOptions{Hash: crypto.SHA256})
-	errorCheck(err, "Failed to decrypt string", true)
+	errorCheck(err, "Failed to decrypt string", false)
 	return string(decryptedBytes)
 }
 
@@ -101,131 +85,68 @@ func (node *Node) decryptMessage(encryptedString string) string {
  *       to a particular batch of messages. Also probably a good idea to add a timeout so that messages do not get stuck if the buffer
  *		 does not fill after some period of time
  */
-func (node *Node) criticalMassDetect(wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func (node *Node) criticalMassDetect() {
 	for {
-		fmt.Println(len(node.dataSet))
 		node.mux.Lock()
 		//If you've reached critical mass then send all of the data you have in a random order to the backend
 		if len(node.dataSet) >= criticalMass {
-			fmt.Println("Forwarding messages to next node")
 			//The order of iterations over maps in go is RANDOM but not every element is equally likely
 			//TODO: Make this more random than it currently is
 			for data, address := range node.dataSet {
-				//Post request if talking to backend, standard TCP message otherwise
-				if address == node.apiEndpoint {
-					resp, err := http.Post(address, "application/json", bytes.NewBuffer([]byte(data)))
-					errorCheck(err, "unable to write to backend", false)
-					fmt.Println("Backend Response: " + resp.Status)
-				} else {
-					outgoingConn, err := net.Dial("tcp", node.neighborNodeIP)
-					errorCheck(err, "Failed to connect to neighbor node", false)
-
-					_, err = outgoingConn.Write([]byte(data))
-					errorCheck(err, "Failed to write to neighbor node", true)
-
-					err = outgoingConn.Close()
-					errorCheck(err, "Failed to close outgoing connection after dialing next node", true)
-				}
-
+				//Post request to relevant address
+				fmt.Println(address)
+				fmt.Println(data)
+				_, err := http.Post(address, "application/json", bytes.NewBuffer([]byte(data)))
+				errorCheck(err, "unable to forward message", false)
 			}
 			node.dataSet = make(map[string]string)
 		}
-
 		node.mux.Unlock()
 
 		time.Sleep(queryTime * time.Second)
 	}
 }
 
-/**
- * Listen for incoming keys from your neighbor node
- */
-func (node *Node) nodeConnListen(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (node *Node) handleRequests() {
+	myRouter := mux.NewRouter().StrictSlash(true)
 
-	ln, err := net.Listen("tcp", "localhost:"+strconv.Itoa(nodePort))
-	errorCheck(err, "Error accepting traffic from neighbor node", false)
-	fmt.Println("Passed listen for connections in node listen")
+	myRouter.HandleFunc("/ClientUpload", node.clientUpload)
+	myRouter.HandleFunc("/NodeTransfer", node.nodeUpload)
+	myRouter.HandleFunc("/GetPubKey", node.getPubKey)
 
-	for {
-		conn, err := ln.Accept()
-		fmt.Println("Passed accept for connections in node listen")
-		errorCheck(err, "Error accepting neighbor node connection", false)
-		go node.handleConnecion(conn, nodeConnection)
-	}
-
+	log.Fatal(http.ListenAndServe(":"+LISTEN_PORT, myRouter))
 }
 
-/**
- * Listen for a client who wants to upload keys
- */
-func (node *Node) clientConnListen(wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	ln, err := net.Listen("tcp", "localhost:"+strconv.Itoa(clientPort))
-	errorCheck(err, "Error accepting new client", false)
-	fmt.Println("Passed listen for connections")
-
-	for {
-		conn, err := ln.Accept()
-		fmt.Println("Accepted new connection")
-		errorCheck(err, "Error accepting new client", false)
-		go node.handleConnecion(conn, clientConnection)
-	}
-}
-
-/////////////////////////
-// Connection Handling //
-/////////////////////////
-
-func (node *Node) handleConnecion(incomingConn net.Conn, connectionType bool) {
-	fmt.Println("HANDLING CONNECTION")
-	message := readSocketData(incomingConn)
-	beg := strings.Index(message, msgDelim)
-	end := strings.LastIndex(message, msgDelim)
-	//message = node.decryptMessage(message[beg+len(msgStart) : end])
-	message = message[beg+len(msgDelim) : end]
-
-	fmt.Println("Received Message: " + message)
+func (node *Node) clientUpload(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	errorCheck(err, "Failed to read client data", false)
+	decryptedMessage := node.decryptMessage(string(data))
+	//decryptedMessage := string(data)
+	fmt.Println("Decrypted Client Data: " + decryptedMessage)
 
 	node.mux.Lock()
-	if connectionType == nodeConnection {
-		node.dataSet[message] = node.apiEndpoint
-	} else if connectionType == clientConnection {
-		node.dataSet[message] = node.neighborNodeIP
-	}
+	node.dataSet[decryptedMessage] = node.neighborNodeIP
+	node.mux.Unlock()
+}
+
+func (node *Node) nodeUpload(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	errorCheck(err, "Failed to read neighbor node data", false)
+	decryptedMessage := node.decryptMessage(string(data))
+	//decryptedMessage := string(data)
+
+	fmt.Println("Decrypted neighbor data: " + decryptedMessage)
+	node.mux.Lock()
+	node.dataSet[decryptedMessage] = node.apiEndpoint
 	node.mux.Unlock()
 }
 
 /**
- * TODO: This is a bit messy and is likely breakable
+ * Returns this nodes public key to the requester
  */
-func readSocketData(incomingConn net.Conn) (returnString string) {
-	defer incomingConn.Close()
-
-ReadData:
-	for {
-		buf := make([]byte, 1024)
-		length, err := bufio.NewReader(incomingConn).Read(buf)
-		data := string(buf[:length])
-		returnString += data
-
-		switch err {
-		case io.EOF:
-			break ReadData
-		case nil:
-			if strings.HasSuffix(data, msgDelim) {
-				break ReadData
-			}
-		default:
-			log.Fatalf("Receive data failed:%s", err)
-			return returnString
-		}
-	}
-
-	return returnString
+func (node *Node) getPubKey(w http.ResponseWriter, r *http.Request) {
+	err := json.NewEncoder(w).Encode(node.pubKey)
+	errorCheck(err, "Failed to return public key to client", false)
 }
 
 /////////////////////////
@@ -240,6 +161,7 @@ ReadData:
  */
 func errorCheck(err error, msg string, fatal bool) {
 	if err != nil {
+		fmt.Println(err)
 		if fatal {
 			log.Fatal(msg)
 		} else {
