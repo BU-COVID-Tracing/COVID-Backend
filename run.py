@@ -47,8 +47,8 @@ dbURL = " --spring.datasource.url=jdbc:mysql://covid-registry:3306/registry?crea
 os.popen("docker network create --driver bridge covid-net")
 
 #Mix Network
-os.popen("docker run -p 8081:8081 -p 8082:8082 -dit --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node0 covid-backend")
-os.popen("docker run -p 8083:8081 -p 8084:8082 -dit --name=mix-net-node1 --network covid-net mix-net-node:latest mix-net-node1 covid-backend")
+os.popen("docker run -p 8081:8081  -dit --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node1:8081 covid-backend:8080")
+os.popen("docker run -p 8082:8081  -dit --name=mix-net-node1 --network covid-net mix-net-node:latest mix-net-node0:8081 covid-backend:8080")
 
 # Decide which database should be spun up based on the run mode of the backend. Some other key storage strategies may not use SQL Databases
 if selection is optionsList[0] or optionsList[1]:
