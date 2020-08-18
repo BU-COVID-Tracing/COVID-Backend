@@ -17,7 +17,7 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
 
     //How many BYTES should be stored at each key in the kv store (i.e. how many BYTES of the bloom filter at each key)
     // TODO: Only 1 works at the moment
-    private final int BUCKET_SIZE_BYTES = 1;
+    //private final int BUCKET_SIZE_BYTES = 1;
 
     public SQLBloomFilterDatabaseInterface(){
         //Equivalent to @Autowire annotation but happens at runtime rather than compile time
@@ -31,12 +31,12 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
         final int BYTE_SIZE = 8;
         //Add the new keys to the filter
         HashMap<Integer,HashSet<Integer>> updatedIndices = this.bloomFilter.insert(myKeys);
-        System.out.println("KeyReg: " + keyReg);
 
-        for (Integer day:updatedIndices.keySet()) {
-            for (Integer bfIndex :updatedIndices.get(day)) {
-                byte mask = (byte) (BYTE_SIZE - 1 - (bfIndex % BYTE_SIZE));
-                int bucket = bfIndex / BUCKET_SIZE_BYTES;
+        for (Integer day:updatedIndices.keySet()){
+            for (Integer bfIndex:updatedIndices.get(day)) {
+                //Shift a one over by the correct offset
+                byte mask = (byte) (1 << (BYTE_SIZE - 1 - (bfIndex % BYTE_SIZE)));
+                int bucket = bfIndex / BYTE_SIZE;
 
                 // TODO: I think collecting these for a bit and batching many together at once may be a better approach to this
                 keyReg.updateBloomFilter(bucket, mask, day);
@@ -65,8 +65,7 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
      */
     @Override
     public Object getData(Integer day) {
-        //TODO: This doesn't need to happen every time. Should be a background thread that occasionally updates
-
+        //TODO: This query doesn't need to happen every time. Should be a background thread that occasionally updates
         ArrayList<SQLBloomFilterData> myData = keyReg.dayQuery(day);
         this.bloomFilter = new BloomFilter(myData);
         SQLBloomFilterResponse response= new SQLBloomFilterResponse(this.bloomFilter,0);
@@ -75,7 +74,7 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
 
     @Override
     public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
-        //TODO: This doesn't need to happen every time. Should be a background thread that occasionally updates
+        //TODO: This query doesn't need to happen every time. Should be a background thread that occasionally updates
         ArrayList<SQLBloomFilterData> myData = (ArrayList<SQLBloomFilterData>) keyReg.findAll();
         this.bloomFilter = new BloomFilter(myData);
 

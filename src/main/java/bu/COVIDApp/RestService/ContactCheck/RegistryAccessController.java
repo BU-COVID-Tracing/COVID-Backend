@@ -1,6 +1,7 @@
 package bu.COVIDApp.RestService.ContactCheck;
 
 import bu.COVIDApp.Database.DatabaseInterface;
+import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +21,10 @@ public class RegistryAccessController {
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked
      * as infected. Return value will depend on scheme in use
-     * @param day the day you would like info for
+     * @param day An optional parameter that allows a user to query for data for only a single day
      * @return The object that will be sent to the user and will allow them to determine if they have made contact with an infected user
      */
     @GetMapping("/contactCheck")
-    //TODO: The return type should be some abstract object that can be implemented for each method
     //TODO: Handle null response here
     public @ResponseBody Object getContactCheck(@RequestParam(defaultValue = "-1") int day){
         if(day == -1)

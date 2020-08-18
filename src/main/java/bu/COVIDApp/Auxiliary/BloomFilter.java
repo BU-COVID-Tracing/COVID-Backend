@@ -16,7 +16,7 @@ public class BloomFilter {
     private final int NUM_HASHES = 3;
     private final int BYTE_SIZE = 8;
 
-    //Might be better to store only non-zero indices
+    // TODO: Might be more efficient to store only non-zero indices if on average the filter is not very full
     private byte[] filterData;
 
     public BloomFilter(){
@@ -54,16 +54,14 @@ public class BloomFilter {
             if(!returnSet.containsKey(key.getDay()))
                 returnSet.put(key.getDay(),new HashSet<>());
 
-            for(int ii = 0; ii < NUM_HASHES;ii++){
+            for(int ii = 1; ii <= NUM_HASHES;ii++){
                 int hash = keyHash(key.getChirp(),ii);
 
                 //Index into the group of 8 bits that you need to update. Set the relevant bit in that group
-                byte mask = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
-                filterData[hash/BYTE_SIZE] = (byte)(filterData[hash/BYTE_SIZE] | (1 << mask));
+                byte offset = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
+                filterData[hash/BYTE_SIZE] = (byte)(filterData[hash/BYTE_SIZE] | (1 << offset));
 
-                //TODO: Should OPTIMIZE by only uploading new changes but having multiple filters for multiple days
-                //      complicates things
-                //if(filterData[hash/BYTE_SIZE] != beforeChanges)
+                //TODO: Should OPTIMIZE by only uploading new changes but having multiple filters for multiple days complicates things
 
                 returnSet.get(key.getDay()).add(hash);
             }
@@ -73,20 +71,20 @@ public class BloomFilter {
     }
 
     /**
-     * As this is a bloom filter, there is a probability
+     * As this is a bloom filter, there is a probability of false positives when finding matches
      * @param myData the list of keys you want to check
-     * @return true if a match is found, false otherwise
+     * @return true if any match is found, false otherwise
      */
     public boolean findMatches(List<InfectedKey> myData){
         for(InfectedKey key:myData){
             boolean found = true;
-            for(int ii = 0; ii < NUM_HASHES;ii++){
+            for(int ii = 1; ii <= NUM_HASHES;ii++){
                 int hash = keyHash(key.getChirp(),ii);
                 //Index into the group of 8 bits that you need to update. Set the relevant bit in that group
-                byte mask = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
+                byte offset = (byte)(BYTE_SIZE - 1 - (hash%BYTE_SIZE));
 
                 //If you OR with the relevant bit and the number changes, the bit was not set
-                if(filterData[hash/BYTE_SIZE] != (byte)(filterData[hash/BYTE_SIZE] | (1 << mask))){
+                if(filterData[hash/BYTE_SIZE] != (byte)(filterData[hash/BYTE_SIZE] | (1 << offset))){
                     found = false;
                     break;
                 }

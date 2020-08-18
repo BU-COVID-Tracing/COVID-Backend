@@ -39,11 +39,11 @@ func main() {
 
 	//TODO: Should do some more thorough checks for proper formatting of args
 	if len(os.Args) != 3 {
-		log.Fatal("Please make sure your input is of the form \"{NeighborIP} {BackendIP}\"")
+		log.Fatal("Please make sure your input is of the form \"{Neighbor_IP:Port} {Backend_IP:Port}\"")
 	}
 
 	//Generate public and private keys
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	errorCheck(err, "Failed to generate RSA Key", true)
 
 	node := Node{
@@ -94,8 +94,6 @@ func (node *Node) criticalMassDetect() {
 			//TODO: Make this more random than it currently is
 			for data, address := range node.dataSet {
 				//Post request to relevant address
-				fmt.Println(address)
-				fmt.Println(data)
 				_, err := http.Post(address, "application/json", bytes.NewBuffer([]byte(data)))
 				errorCheck(err, "unable to forward message", false)
 			}
@@ -112,7 +110,7 @@ func (node *Node) handleRequests() {
 
 	myRouter.HandleFunc("/ClientUpload", node.clientUpload)
 	myRouter.HandleFunc("/NodeTransfer", node.nodeUpload)
-	myRouter.HandleFunc("/GetPubKey", node.getPubKey)
+	myRouter.HandleFunc("/PubKey", node.getPubKey)
 
 	log.Fatal(http.ListenAndServe(":"+LISTEN_PORT, myRouter))
 }
@@ -120,9 +118,10 @@ func (node *Node) handleRequests() {
 func (node *Node) clientUpload(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadAll(r.Body)
 	errorCheck(err, "Failed to read client data", false)
-	decryptedMessage := node.decryptMessage(string(data))
-	//decryptedMessage := string(data)
-	fmt.Println("Decrypted Client Data: " + decryptedMessage)
+	//Need to use something other than rsa for this
+	//decryptedMessage := node.decryptMessage(string(data))
+	decryptedMessage := string(data)
+	fmt.Println("Client Data: " + decryptedMessage)
 
 	node.mux.Lock()
 	node.dataSet[decryptedMessage] = node.neighborNodeIP

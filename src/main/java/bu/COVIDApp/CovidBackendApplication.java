@@ -32,6 +32,7 @@ public class CovidBackendApplication {
 					" with the following flag -Dspring-boot.run.arguments=\"YourRunMode\"");
 		}
 
+        //TODO: Add background thread that cleans older days out of the database occasionally
 		SpringApplication.run(CovidBackendApplication.class, args);
 	}
 }

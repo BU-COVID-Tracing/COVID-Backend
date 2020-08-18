@@ -47,15 +47,15 @@ dbURL = " --spring.datasource.url=jdbc:mysql://covid-registry:3306/registry?crea
 os.popen("docker network create --driver bridge covid-net")
 
 #Mix Network
-os.popen("docker run -p 8081:8081  -dit --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node1:8081 covid-backend:8080")
-os.popen("docker run -p 8082:8081  -dit --name=mix-net-node1 --network covid-net mix-net-node:latest mix-net-node0:8081 covid-backend:8080")
+os.popen("docker run -p 8081:8081  -dit --rm --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node1:8081 covid-backend:8080")
+os.popen("docker run -p 8082:8081  -dit --rm --name=mix-net-node1 --network covid-net mix-net-node:latest mix-net-node0:8081 covid-backend:8080")
 
-# Decide which database should be spun up based on the run mode of the backend. Some other key storage strategies may not use SQL Databases
+# Decide which database should be spun up based on the run mode of the backend. Some other key storage strategies may not use SQL Databases (Ex. Bloom Filter Key Value)
 if selection is optionsList[0] or optionsList[1]:
-    dbContainerID = os.popen("docker run -d -p 3306:3306 --network covid-net --name=covid-registry -e MYSQL_ROOT_PASSWORD=" + dbPassword + " mysql:latest").read()
+    dbContainerID = os.popen("docker run -d --rm -p 3306:3306 --network covid-net --name=covid-registry -e MYSQL_ROOT_PASSWORD=" + dbPassword + " mysql:latest").read()
 
     # Should try to do a check to see if the db is running rather than just sleeping
     time.sleep(10) # Give time for the database to initialize before launching the backend
 
     #TODO: Substitute the location of the hosted image once it is up
-    os.popen("docker run -p 8080:8080 -dit --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)
+    os.popen("docker run -p 8080:8080 -dit --rm --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)

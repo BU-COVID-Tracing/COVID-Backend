@@ -84,7 +84,7 @@ class CovidRegistryUnitTests {
 	@Test
 	void BloomFilterConcurrencyTest(){
 		final int THREADS = 20;
-		final int KEYS_PER_THREAD = 5;
+		final int KEYS_PER_THREAD = 10;
 
 		BloomFilter myBF = new BloomFilter();
 		ExecutorService executor = Executors.newFixedThreadPool(THREADS);

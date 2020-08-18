@@ -47,9 +47,9 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
     public Boolean checkKeys(ArrayList<InfectedKey> myKeys) {
         ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
         for(InfectedKey key:myKeys){
-            SQLKeySetData compareValue = new SQLKeySetData(key);
-            if(myData.contains(compareValue))
-                return true;
+            for(SQLKeySetData data:myData)
+                if(data.getChirp().equals(key.getChirp()))
+                    return true;
         }
 
         return false;

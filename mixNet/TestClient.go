@@ -39,18 +39,21 @@ func main() {
 
 	cl.getPubKeys()
 
-	fmt.Println(*cl.pubKey[0])
-	testString := "[{\"chirp\":\"chirp1\",\"day\":\"1\"},{\"chirp\":\"ThisIsANewChrip\",\"day\":\"2\"}]"
-	data := cl.encryptData(1,cl.encryptData(0,[]byte(testString)))
+	testString := "[{\"chirp\":\"123e4567-e89b-12d5-a456-426614134000\",\"day\":\"1\"},{\"chirp\":\"12346678-1233-5648-1234-56781234e678\",\"day\":\"2\"}]"
+	data := cl.encryptData(1,[]byte(testString))
 
+	// TODO: Should be encrypting with both nodes keys but padding and rsa message length limits prevent this from functioning properly
+	// TODO: Look into libsodium and google/tink for arbitrary length rsa encryption. This will require a react native encryption library as well so that the app can encrypt the data to be sent properly
+	//data := cl.encryptData(1,cl.encryptData(0,[]byte(testString)))
+
+	fmt.Println(string(data))
 	_, err := http.Post("http://"+cl.node[0]+"/ClientUpload", "text/plain", bytes.NewBuffer(data))
 	errCheck(err,"Error posting data",false)
 }
 
 
 func (cl *client) encryptData(nodeNum int,message []byte) []byte{
-	rng:= rand.Reader
-	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rng, cl.pubKey[nodeNum], message,[]byte("keys"))
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, cl.pubKey[nodeNum], message,[]byte(""))
 	errCheck(err,"Failed to encrypt message",false)
 
 	return ciphertext

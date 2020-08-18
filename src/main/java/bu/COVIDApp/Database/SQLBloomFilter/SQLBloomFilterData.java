@@ -1,7 +1,6 @@
 package bu.COVIDApp.Database.SQLBloomFilter;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name="SQLBloomFilter")
@@ -11,16 +10,16 @@ public class SQLBloomFilterData {
     private Byte data;
 
     @EmbeddedId
-    private CompositeKey dayIndex;
+    private SQLBloomFilterCompositeKey dayIndex;
 
     public SQLBloomFilterData(){
         this.data = 0;
-        this.dayIndex = new CompositeKey();
+        this.dayIndex = new SQLBloomFilterCompositeKey();
     }
 
     public SQLBloomFilterData(Integer index,Byte data,Integer day){
         this.data = data;
-        this.dayIndex = new CompositeKey(day,index);
+        this.dayIndex = new SQLBloomFilterCompositeKey(day,index);
     }
 
     public Byte getData() {
@@ -31,47 +30,11 @@ public class SQLBloomFilterData {
         this.data = data;
     }
 
-    public CompositeKey getDayIndex() {
+    public SQLBloomFilterCompositeKey getDayIndex() {
         return dayIndex;
     }
 
-    public void setDayIndex(CompositeKey dayIndex) {
+    public void setDayIndex(SQLBloomFilterCompositeKey dayIndex) {
         this.dayIndex = dayIndex;
-    }
-
-
-    @Embeddable
-    public class CompositeKey implements Serializable{
-        public CompositeKey(){
-            this.day = 0;
-            this.index = 0;
-        }
-
-        public CompositeKey(Integer day, Integer index){
-            this.day = day;
-            this.index = index;
-        }
-
-        @Column(name = "myDay",nullable = false)
-        private Integer day;
-
-        @Column(name = "myIndex",nullable = false)
-        private Integer index;
-
-        public Integer getDay() {
-            return day;
-        }
-
-        public void setDay(Integer day) {
-            this.day = day;
-        }
-
-        public Integer getIndex() {
-            return index;
-        }
-
-        public void setIndex(Integer key) {
-            this.index = key;
-        }
     }
 }
