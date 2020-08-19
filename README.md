@@ -1,38 +1,87 @@
-# COVID-Backend
-### Raw Build Dependencies
-* Java 8
-* Maven
-### Docker Build Dependencies
-* Docker
-* Python3
+## Build/Install Instructions
+#### What is contained in this repository?
+ * A Java Spring Boot Backend API
+ * Go code for mix network nodes (For upload anonymization)
+ * Dockerfiles for the above componenets
+ * Python scripts for spinning up and connecting the following containers (2 Mix Nodes -> Backend -> MySQL Database)
+ * A basic client that encrypts some uuids and sends them to the backend through the mix nodes
 
-### Raw Build Instructions:
-* Fill in the relevant details for your mysql database (endpoint,username and password) under `src/main/resources/application.properties`
-* The first time you use a database with the application, you will need to set the following in application.properties to create the relevant table `spring.jpa.hibernate.ddl-auto=create`. After the table has been created this parameter can be changed to `none`
-* Run `mvn clean install`
-* Run `mvn spring-boot:run -Dspring-boot.run.arguments="SQLKeySet"` to start up the backend using the SQLKeySet backend schema. The backend will then listen on port 8080 for incoming requests 
+#### Backend Dependencies
+ * Java 8
+ * Maven (Will install the remaining dependencies)
+ 
+#### Mix Network Dependencies
+ * Golang 1.14
+ * gorilla/mux
+ 	* Run the following with go installed `go get -u github.com/gorilla/mux`
 
-### Sample Requests (For SQLKeySet)
+#### Docker Deployment Dependencies
+ * Docker
+ * Python3 (If you would like to use the deploy script provided)
+ 
 
-* Post a new key to the database with curl
-`curl --location --request POST 'localhost:8080/InfectedKey' \
---header 'Content-Type: application/json' \
---data-raw '[{
-	"chirp":"my-key",
-	"time":"time"
-}]'`
+#### Building Docker Images
+ * Docker images are not yet hosted anywhere so will need be built manually for the time being
+ * Run the following commands from the project root directory
+ * Building Backend
+ 	* `mvn clean package`
+	* `docker build -t "covid-backend" .
+ * Building MixNode
+ 	* `docker build -t "mix-net-node" ./mixNet
+ * Run `docker images` and look for "covid-backend" and "mix-net-node" to make sure that the images have built
+ 
+#### Deploying the System with Docker
+ * Run `python3 run.py` to deploy and connect the backend components
+ * You will be asked to select either SQLKeySet or SQLBloomFilter (These can also be passed as an argument to run.py)
+ 	* See Backend Run Modes below for more details on this
+ * The test client in mixnet/TestClient.go can be run with  `go run TestClient.go {MixNode0_IP:port} {MixNode1_IP:port}`. The mix node addresses set by the run.py script are localhost:8081 and localhost:8082
 
-* Get a list of keys in the database with curl 
-`curl --location --request GET 'localhost:8080/contactCheck' \
---data-raw ''`
-
-### Building The Docker Image (This image will be hosted somewhere soon)
-* With the proper dependencies installed, run mvn clean package. This will create a jar file in the target folder
-* Run `docker build -t "covid-backend:OCDockerfile" .` to create the docker image
-
-### Running From Docker
-* With the Docker Daemon running, run `python3 run.py`
-* If you didn't pass an arg to run.py you will be prompted to pick a run mode
-* The script will spin up a container running the backend as well as one running the database required for that schema
-* You should then be able to make requests to the backend at localhost:8080
-* To shut down the backend, use docker ps to find the id of the container running covid-backend and covid-registry and run docker stop {container-id}
+## Backend
+### Backend Run Modes
+ * The backend has 2 different key storage schemas that result in different behavior
+#### SQLKeySet
+ * Key Uploads: Keys are stored in plain text as they are collected in a SQL Database
+ * Key Requests: Keys are returned to the user in plain text
+#### SQLBloomFilter
+ * Key Uploads: Keys are stored in a [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter) and the original key is discarded
+ * Key Requests: A bloom filter with the keys that have been uploaded is returned. The user can then perform their own checks against the bloom filter to check if the keys they have are *possibly* in the bloom filter
+ 	* Because this approach uses a bloom filter, there is a false positive rate determined by the size of the filter, number of hash functions used, and the number of entries in the filter. The current values for these parameters are meant only for testing. 
+	
+### Making requests to the backend
+ * POST /InfectedKey
+	 * Allows the user to post a list of json objects containing a "chirp":string and a "time":int to the backend
+	 * This endpoint should only be used by the MixNetwork if user upload anonymity is desired
+ 	 * Ex: Posting 2 keys from day 1 and day 2 `
+	  curl --location --request POST 'localhost:8080/InfectedKey' --header 'Content-Type: application/json' --data-raw '[
+			{
+				"chirp":"12345678-1234-5678-1234-567812345678",
+				"time":1
+			},
+			{
+				"chirp":"32645679-1634-2678-1274-562812345678",
+				"time":2
+			}
+	]'
+	`
+ * GET /ContactCheck
+ 	* Requests the keys for a particular day (or some representation of those keys; see backend run modes above)
+ 	* The query param `day=int` can also be set to only query for keys tagged with that day.
+	* `day` can be omitted or set to -1 to request all of the days stored in the system
+  	* Ex: A request for all keys from day 2 `curl --location --request GET 'localhost:8080/ContactCheck?day=2' --data-raw ''`
+	
+ * POST /ContactCheck
+ 	* A serverside check for key matches
+	* A user can upload a list of json objects containing a "chirp":string and "time":int to be checked against the backend
+	* The backend responds with true if a match is found or false if no match is found.
+	* May be useful for wearables where resources (memory/compute) may be constrained
+ 	* Ex: Checking if a chirp is found on the backend`curl --location --request POST 'localhost:8080/ContactCheck' --header 'Content-Type: application/json' --data-raw '{
+		"keyArray":[
+			{
+			"chirp":"12346678-1233-5648-1234-56781234e678",
+			"time":1
+			}
+		]
+	}'`
+	
+### Posting Keys using the Mix Network
+ * 
