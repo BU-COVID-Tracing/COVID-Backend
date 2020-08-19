@@ -48,4 +48,40 @@
  	* Because this approach uses a bloom filter, there is a false positive rate determined by the size of the filter, number of hash functions used, and the number of entries in the filter. The current values for these parameters are meant only for testing. 
 	
 ### Making requests to the backend
+ * POST /InfectedKey
+	 * Allows the user to post a list of json objects containing a "chirp":string and a "time":int to the backend
+	 * This endpoint should only be used by the MixNetwork if user upload anonymity is desired
+ 	 * Ex: Posting 2 keys from day 1 and day 2 `
+	  curl --location --request POST 'localhost:8080/InfectedKey' --header 'Content-Type: application/json' --data-raw '[
+			{
+				"chirp":"12345678-1234-5678-1234-567812345678",
+				"time":1
+			},
+			{
+				"chirp":"32645679-1634-2678-1274-562812345678",
+				"time":2
+			}
+	]'
+	`
+ * GET /ContactCheck
+ 	* Requests the keys for a particular day (or some representation of those keys; see backend run modes above)
+ 	* The query param `day=int` can also be set to only query for keys tagged with that day.
+	* `day` can be omitted or set to -1 to request all of the days stored in the system
+  	* Ex: A request for all keys from day 2 `curl --location --request GET 'localhost:8080/ContactCheck?day=2' --data-raw ''`
+	
+ * POST /ContactCheck
+ 	* A serverside check for key matches
+	* A user can upload a list of json objects containing a "chirp":string and "time":int to be checked against the backend
+	* The backend responds with true if a match is found or false if no match is found.
+	* May be useful for wearables where resources (memory/compute) may be constrained
+ 	* Ex: Checking if a chirp is found on the backend`curl --location --request POST 'localhost:8080/ContactCheck' --header 'Content-Type: application/json' --data-raw '{
+		"keyArray":[
+			{
+			"chirp":"12346678-1233-5648-1234-56781234e678",
+			"time":"1"
+			}
+		]
+	}'`
+	
+### Posting Keys using the Mix Network
  * 
