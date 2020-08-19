@@ -83,7 +83,7 @@
 		]
 	}'`
 	
-### Posting Keys using the Mix Network (Still a work in progress)
+### Posting Keys using the Mix Network
  * A simple example client can be found at mixNet/TestClient.go
  * The goal of the mix network is to make sure that no single server knows both where the keys came from and the actual value of the keys at the same time, therefore the users ip is not linked to the keys that they have uploaded
  * Each node has the following routes
