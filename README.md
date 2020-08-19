@@ -83,5 +83,14 @@
 		]
 	}'`
 	
-### Posting Keys using the Mix Network
- * 
+### Posting Keys using the Mix Network (Still a work in progress)
+ * A simple example client can be found at mixNet/TestClient.go
+ * The goal of the mix network is to make sure that no single server knows both where the keys came from and the actual value of the keys at the same time, therefore the users ip is not linked to the keys that they have uploaded
+ * Each node has the following routes
+ 	* /ClientUpload - This is where the client should upload their encrypted keys
+	* /NodeUpload - This is used for communication from the nodes neighbor. Should not be used by the client
+	* /PubKey - Used to get the nodes public key to be used for encrypting messages
+ * The client should first get the PubKey of both nodes in the network
+ * When it sends a message it should then randomly choose one of the nodes to upload to and encrypt the message with the public key of the node it is NOT uploading to. (Ideally we want to encrypt with both nodes keys but the current OAEP RSA encryption does not allow this)
+ * Encryption should be RSA OAEP with sha256 hashing
+ * This encrypted message should then be the body of a POST request to /ClientUpload. It will then be forwarded, decrypted, then posted to the backend
