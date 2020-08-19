@@ -36,6 +36,7 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
 
     /**
      * Gets all of the keys associated with a particular day
+     * @param day The day you would like to get keys from
      */
     @Override
     public SQLKeySetResponse getData(Integer day) {

@@ -118,8 +118,12 @@ func (node *Node) handleRequests() {
 func (node *Node) clientUpload(w http.ResponseWriter, r *http.Request) {
 	data, err := ioutil.ReadAll(r.Body)
 	errorCheck(err, "Failed to read client data", false)
-	//Need to use something other than rsa for this
+
+	//RSA padding and message size limits is preventing encrypting messages twice.
+	//This can be fixed but will need to find a library that works for go and react-native (So it can be run on the app)
+	//Look into libsodium and google/tink
 	//decryptedMessage := node.decryptMessage(string(data))
+
 	decryptedMessage := string(data)
 	fmt.Println("Client Data: " + decryptedMessage)
 
