@@ -24,7 +24,7 @@ public class RegistryAccessController {
      * @param day An optional parameter that allows a user to query for data for only a single day
      * @return The object that will be sent to the user and will allow them to determine if they have made contact with an infected user
      */
-    @GetMapping("/contactCheck")
+    @GetMapping("/ContactCheck")
     //TODO: Handle null response here
     public @ResponseBody Object getContactCheck(@RequestParam(defaultValue = "-1") int day){
         if(day == -1)
@@ -38,7 +38,7 @@ public class RegistryAccessController {
      * @param UserInput an object containing the keys that the user would like to check
      * @return true or false depending on if contact was detected or not
      */
-    @PostMapping("/contactCheck")
+    @PostMapping("/ContactCheck")
     public @ResponseBody boolean postContactCheck(@RequestBody RegistryPostInput UserInput){
         return myInterface.checkKeys(UserInput.getKeys());
     }
