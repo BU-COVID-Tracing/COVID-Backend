@@ -24,6 +24,7 @@
  * Docker images are not yet hosted anywhere so will need be built manually for the time being
  * Run the following commands from the project root directory
  * Building Backend
+ 	* `mvn clean install`
  	* `mvn clean package`
 	* `docker build -t "covid-backend" .
  * Building MixNode
