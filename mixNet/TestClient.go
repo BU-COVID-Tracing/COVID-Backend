@@ -26,7 +26,7 @@ type publicKey struct {
 
 type infectedKey struct {
 	Chirp string `json:"chirp"`
-	Time  int    `json:"time"`
+	Day   int    `json:"day"`
 }
 
 const sampleChirps = 5
@@ -55,7 +55,7 @@ func main() {
 
 		keys[ii] = infectedKey{
 			Chirp: string(b),
-			Time:  1,
+			Day:   1,
 		}
 	}
 
@@ -82,7 +82,7 @@ func main() {
 
 		keys[ii] = infectedKey{
 			Chirp: string(b),
-			Time:  1,
+			Day:   1,
 		}
 	}
 
