@@ -4,7 +4,7 @@
  * Go code for mix network nodes (For upload anonymization)
  * Dockerfiles for the above componenets
  * Python scripts for spinning up and connecting the following containers (2 Mix Nodes -> Backend -> MySQL Database)
- * A basic client that encrypts some uuids and sends them to the backend through the mix nodes
+ * A basic client that encrypts some data and sends it to the backend through the mix nodes
 
 #### Backend Dependencies
  * Java 8
@@ -24,6 +24,7 @@
  * Docker images are not yet hosted anywhere so will need be built manually for the time being
  * Run the following commands from the project root directory
  * Building Backend
+ 	* `mvn clean install`
  	* `mvn clean package`
 	* `docker build -t "covid-backend" .
  * Building MixNode
