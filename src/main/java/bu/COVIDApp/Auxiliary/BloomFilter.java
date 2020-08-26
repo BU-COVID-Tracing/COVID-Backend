@@ -32,6 +32,10 @@ public class BloomFilter {
         this.insert(myData);
     }
 
+    /**
+     * takes database data format and creates a bloom filter from it
+     * @param myData the data you would like to add to the bloom filter
+     */
     public BloomFilter(ArrayList<SQLBloomFilterData> myData){
         this.filterData = new byte[HASH_CEILING];
 
@@ -102,6 +106,7 @@ public class BloomFilter {
     }
 
     /**
+     * THIS IS A FILLER HASH FUNCTION. THIS SHOULD NOT BE DEPLOYED UNTIL THIS IS CHANGED
      * TODO: Put an actual hash function here that can be performed on the frontend as well(maybe murmur3)
      * @param inputKey the key that you would like to get the hash value of
      * @param modifier an integer that can be adjusted to give a second hash for the same input

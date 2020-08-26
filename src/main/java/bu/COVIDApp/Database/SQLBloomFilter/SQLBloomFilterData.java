@@ -9,6 +9,10 @@ public class SQLBloomFilterData {
     @Column(name = "myData")
     private Byte data;
 
+
+    /**
+     * This is a composite primary key for this table (only 1 row can exist with each day/index pairing)
+     */
     @EmbeddedId
     private SQLBloomFilterCompositeKey dayIndex;
 

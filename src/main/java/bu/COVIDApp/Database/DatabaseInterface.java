@@ -8,8 +8,12 @@ import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class DatabaseInterface {
+
+    //The number of hours between calling purgeOldKeys
+    final static int CLEAN_FREQ = 24;
 
     //////////////////
     //Initialization//
@@ -17,6 +21,7 @@ public abstract class DatabaseInterface {
 
     /**
      * Initialize the relevant DatabaseInterface child based on the value of CovidAppApplication.myRunMode
+     * Also launches the cleanup thread that will occasionally clean old records from the db
      * @return An instantiated child class of DatabaseInterface
      */
     public static DatabaseInterface InterfaceInitializer(){
@@ -34,7 +39,36 @@ public abstract class DatabaseInterface {
                 break;
         }
 
+        //purge old entries once per 24 hours and increment the day count
+        cleanupThread thread = new cleanupThread(myInterface);
+        thread.start();
+
         return myInterface;
+    }
+
+    public static class cleanupThread extends Thread {
+        private DatabaseInterface myInterface;
+
+        cleanupThread(DatabaseInterface myInterface){
+            this.myInterface = myInterface;
+        }
+
+        public void run(){
+            while(true){
+                try {
+                    TimeUnit.HOURS.sleep(CLEAN_FREQ);
+//                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                this.myInterface.purgeOldKeys(CovidBackendApplication.EXPOSURE_PERIOD);
+
+                //TODO: Should calculate the currentDay from some static point in time rather than just starting at 0 and incrementing
+                CovidBackendApplication.currentDay++;
+                System.out.println(CovidBackendApplication.currentDay);
+            }
+        }
     }
 
     ///////////////
@@ -72,6 +106,11 @@ public abstract class DatabaseInterface {
     public abstract Boolean checkKeys(ArrayList<InfectedKey> myKeys);
 
 
+    /*
+     * @param cutoff Any keys tagged with a date more than cutoff days before the current day will be erased from the database
+     * @return Boolean true if the operations succeeds, false otherwise
+     */
+    public abstract void purgeOldKeys(Integer cutoff);
 
     /////////////////
     //Authorization//

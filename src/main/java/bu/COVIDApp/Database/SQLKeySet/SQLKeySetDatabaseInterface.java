@@ -1,5 +1,6 @@
 package bu.COVIDApp.Database.SQLKeySet;
 
+import bu.COVIDApp.CovidBackendApplication;
 import bu.COVIDApp.Database.DatabaseInterface;
 import bu.COVIDApp.RestService.AppContext;
 import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
@@ -11,15 +12,18 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
     private final SQLKeySetRegistry keyReg;
 
     public SQLKeySetDatabaseInterface(){
-        //Equivalent to a manual @Autowire at runtime
+        //Equivalent to a manual @Autowire at runtime to get around the packaging issue
         keyReg = AppContext.getContext().getBean(SQLKeySetRegistry.class);
     }
 
     @Override
     public boolean uploadKeys(List<InfectedKey> myKeys) {
         for(InfectedKey key:myKeys){
-            SQLKeySetData myData = new SQLKeySetData(key.getChirp(),key.getDay());
-            keyReg.save(myData);
+            // This makes sure that the db can't be filled with invalid data that will not be cleaned out for a long time or already expired data
+            if(key.getDay() <= CovidBackendApplication.currentDay && key.getDay() > CovidBackendApplication.currentDay-CovidBackendApplication.EXPOSURE_PERIOD){
+                SQLKeySetData myData = new SQLKeySetData(key.getChirp(),key.getDay());
+                keyReg.save(myData);
+            }
         }
 
         return true;
@@ -54,5 +58,13 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
         }
 
         return false;
+    }
+
+    /**
+     * @param cutoff The number of days after which keys should be purged from the database
+     */
+    @Override
+    public void purgeOldKeys(Integer cutoff) {
+        keyReg.purgeOldKeys(CovidBackendApplication.currentDay - cutoff);
     }
 }

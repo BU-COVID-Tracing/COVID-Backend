@@ -52,6 +52,7 @@
  * POST /InfectedKey
 	 * Allows the user to post a list of json objects containing a "chirp":string and a "day":int to the backend
 	 * This endpoint should only be used by the MixNetwork if user upload anonymity is desired
+	 * Keys that are not within a 14 day range prior to the current day of the system will be discarded
  	 * Ex: Posting 2 keys from day 1 and day 2 `
 	  curl --location --request POST 'localhost:8080/InfectedKey' --header 'Content-Type: application/json' --data-raw '[
 			{
