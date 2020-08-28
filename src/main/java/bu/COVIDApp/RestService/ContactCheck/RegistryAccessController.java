@@ -40,5 +40,4 @@ public class RegistryAccessController {
     public @ResponseBody boolean postContactCheck(@RequestBody RegistryPostInput UserInput){
         return myInterface.checkKeys(UserInput.getKeys());
     }
-
 }

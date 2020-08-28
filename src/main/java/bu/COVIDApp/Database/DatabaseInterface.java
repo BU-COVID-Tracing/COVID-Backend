@@ -15,6 +15,11 @@ public abstract class DatabaseInterface {
     //The number of hours between calling purgeOldKeys
     final static int CLEAN_FREQ = 24;
 
+    /**
+     * If an interface has already been initialized, return the initialized version instead of making a new one
+     */
+    static DatabaseInterface systemDB = null;
+
     //////////////////
     //Initialization//
     //////////////////
@@ -25,25 +30,27 @@ public abstract class DatabaseInterface {
      * @return An instantiated child class of DatabaseInterface
      */
     public static DatabaseInterface InterfaceInitializer(){
-        DatabaseInterface myInterface = null;
+        System.out.println("Interface Initializer");
 
-        switch (CovidBackendApplication.myRunMode){
-            case SQLKeySet:
-                myInterface = new SQLKeySetDatabaseInterface();
-                break;
-            case SQLBloomFilter:
-                myInterface = new SQLBloomFilterDatabaseInterface();
-                break;
-            case BloomFilterKV:
-                myInterface = new KVBloomFilterDatabaseInterface();
-                break;
+        if(systemDB == null){
+            switch (CovidBackendApplication.myRunMode){
+                case SQLKeySet:
+                    systemDB = new SQLKeySetDatabaseInterface();
+                    break;
+                case SQLBloomFilter:
+                    systemDB = new SQLBloomFilterDatabaseInterface();
+                    break;
+                case BloomFilterKV:
+                    systemDB = new KVBloomFilterDatabaseInterface();
+                    break;
+            }
+
+            //purge old entries once per 24 hours and increment the day count
+            cleanupThread thread = new cleanupThread(systemDB);
+            thread.start();
         }
 
-        //purge old entries once per 24 hours and increment the day count
-        cleanupThread thread = new cleanupThread(myInterface);
-        thread.start();
-
-        return myInterface;
+        return systemDB;
     }
 
     public static class cleanupThread extends Thread {

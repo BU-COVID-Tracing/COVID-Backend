@@ -55,7 +55,7 @@ func main() {
 
 		keys[ii] = infectedKey{
 			Chirp: string(b),
-			Day:   1,
+			Day:   0,
 		}
 	}
 
