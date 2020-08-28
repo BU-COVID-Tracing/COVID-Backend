@@ -47,7 +47,10 @@
  * Key Uploads: Keys are stored in a [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter) and the original key is discarded
  * Key Requests: A bloom filter with the keys that have been uploaded is returned. The user can then perform their own checks against the bloom filter to check if the keys they have are *possibly* in the bloom filter
  	* Because this approach uses a bloom filter, there is a false positive rate determined by the size of the filter, number of hash functions used, and the number of entries in the filter. The current values for these parameters are meant only for testing. 
-	
+
+### Notes
+ * Keys that are from after the currentDay of the backend or are from more than 14 days before current day will be discarded when uploaded to prevent unnecessary transactions.
+ * Current day updates every 24 hours and starts at 0 when the system starts.
 ### Making requests to the backend
  * POST /InfectedKey
 	 * Allows the user to post a list of json objects containing a "chirp":string and a "day":int to the backend
