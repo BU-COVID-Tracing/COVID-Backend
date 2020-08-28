@@ -24,7 +24,6 @@ public class RegistryAccessController {
      * @return The object that will be sent to the user and will allow them to determine if they have made contact with an infected user
      */
     @GetMapping("/ContactCheck")
-    //TODO: Handle null response here
     public @ResponseBody Object getContactCheck(@RequestParam(defaultValue = "-1") int day){
         if(day == -1)
             return myInterface.getData();

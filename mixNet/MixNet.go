@@ -90,7 +90,7 @@ func (node *Node) criticalMassDetect() {
 		node.mux.Lock()
 		//If you've reached critical mass then send all of the data you have in a random order to the backend
 		if len(node.dataSet) >= criticalMass {
-			//The order of iterations over maps in go is RANDOM but not every element is equally likely
+			//The order of iterations over maps in go is RANDOM but not every element is equally likely apparently
 			//TODO: Make this more random than it currently is
 			for data, address := range node.dataSet {
 				//Post request to relevant address

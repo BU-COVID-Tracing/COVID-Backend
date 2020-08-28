@@ -55,6 +55,7 @@ public abstract class DatabaseInterface {
 
         public void run(){
             while(true){
+               System.out.println("System Current Day: "+CovidBackendApplication.currentDay);
                 try {
                     TimeUnit.HOURS.sleep(CLEAN_FREQ);
 //                    TimeUnit.SECONDS.sleep(5);
@@ -66,7 +67,6 @@ public abstract class DatabaseInterface {
 
                 //TODO: Should calculate the currentDay from some static point in time rather than just starting at 0 and incrementing
                 CovidBackendApplication.currentDay++;
-                System.out.println(CovidBackendApplication.currentDay);
             }
         }
     }
