@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import sys
 import random
@@ -39,12 +41,15 @@ random.seed(time.time())
 dbPassword = str(random.randint(0, sys.maxsize))
 print("Database Password: ",dbPassword)
 
-dbPasswordVar = " --spring.datasource.password=" + dbPassword 
+dbPasswordVar = " --spring.datasource.password=" + dbPassword
 dbUser = " --spring.datasource.username=root"
 dbURL = " --spring.datasource.url=jdbc:mysql://covid-registry:3306/registry?createDatabaseIfNotExist=true"
 
-#Create a network bridge 
-os.popen("docker network create --driver bridge covid-net")
+#Create a network bridge
+os.popen('docker network inspect covid-net >/dev/null || docker network create --driver bridge covid-net')
+
+# Remove all containers if exist, ignore all errors
+os.popen('docker rm -f mix-net-node1 mix-net-node0 covid-registry covid-backend 2>/dev/null')
 
 #Mix Network
 os.popen("docker run -p 8081:8081  -dit --rm --name=mix-net-node0 --network covid-net mix-net-node:latest mix-net-node1:8081 covid-backend:8080")
