@@ -10,6 +10,6 @@ COPY . .
 RUN apk update && apk add git
 RUN go get -u github.com/gorilla/mux
 EXPOSE 8081
-ENTRYPOINT ["go","run","MixNet.go"]
+ENTRYPOINT ["go","run","main.go"]
 
 # ENTRYPOINT ["MixNet"]

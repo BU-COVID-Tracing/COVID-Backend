@@ -8,13 +8,14 @@ import (
 	_ "crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 const LISTEN_PORT = "8081"
