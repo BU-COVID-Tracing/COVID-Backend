@@ -9,6 +9,36 @@
 #### Backend Dependencies
  * Java 8
  * Maven (Will install the remaining dependencies)
+ * MySQL database
+
+##### Basic Backend Deployment
+The Backend API is implemented in Spring Boot. We don't need the
+containers (nor the mixnet functionality) to test the backend API.
+
+To run the Spring Boot API:
+- Make sure that you have your MySQL set and running
+  - In `src/main/resources/application.properties` set up the following parameters:
+    - `spring.datasource.url`
+    - `spring.datasource.username`
+    - `spring.datasource.password`
+- Build the jar:
+
+``` shell
+$ mvn clean install
+$ mvn clean package
+```
+This makes `COVID-App-{VERSION}.jar` in your `target` directory.
+- Run the spring application:
+
+``` shell
+$ java -jar target/COVID-App-0.0.1-SNAPSHOT.jar
+```
+If everything goes well, you will see the API defined in `src/main/java/bu/COVIDApp/RestService` exposed on `8080`.
+
+Unfortunately, the current container deployment does not pack the
+database. You need to set up one outside of the container
+environment. The only containers are the one that packs the API jar
+itself, and the one that packs the mixnet Golang application.
 
 #### Mix Network Dependencies
  * Golang 1.14
