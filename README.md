@@ -9,36 +9,6 @@
 #### Backend Dependencies
  * Java 8
  * Maven (Will install the remaining dependencies)
- * MySQL database
-
-##### Basic Backend Deployment
-The Backend API is implemented in Spring Boot. We don't need the
-containers (nor the mixnet functionality) to test the backend API.
-
-To run the Spring Boot API:
-- Make sure that you have your MySQL set and running
-  - In `src/main/resources/application.properties` set up the following parameters:
-    - `spring.datasource.url`
-    - `spring.datasource.username`
-    - `spring.datasource.password`
-- Build the jar:
-
-``` shell
-$ mvn clean install
-$ mvn clean package
-```
-This makes `COVID-App-{VERSION}.jar` in your `target` directory.
-- Run the spring application:
-
-``` shell
-$ java -jar target/COVID-App-0.0.1-SNAPSHOT.jar
-```
-If everything goes well, you will see the API defined in `src/main/java/bu/COVIDApp/RestService` exposed on `8080`.
-
-Unfortunately, the current container deployment does not pack the
-database. You need to set up one outside of the container
-environment. The only containers are the one that packs the API jar
-itself, and the one that packs the mixnet Golang application.
 
 #### Mix Network Dependencies
  * Golang 1.14
@@ -56,13 +26,13 @@ itself, and the one that packs the mixnet Golang application.
  * Building Backend
  	* `mvn clean install`
  	* `mvn clean package`
-	* `docker build -t "covid-backend" .`
+	* `docker build -t "covid-backend" .
  * Building MixNode
- 	* `docker build -t "mix-net-node" ./mixNet`
+ 	* `docker build -t "mix-net-node" ./mixNet
  * Run `docker images` and look for "covid-backend" and "mix-net-node" to make sure that the images have built
 
 #### Deploying the System with Docker
- * Run `./run.py` to deploy and connect the backend components
+ * Run `python3 run.py` to deploy and connect the backend components
  * You will be asked to select either SQLKeySet or SQLBloomFilter (These can also be passed as an argument to run.py)
  	* See Backend Run Modes below for more details on this
  * The test client in mixnet/TestClient.go can be run with  `go run TestClient.go {MixNode0_IP:port} {MixNode1_IP:port}`. The mix node addresses set by the run.py script are localhost:8081 and localhost:8082
@@ -86,8 +56,7 @@ itself, and the one that packs the mixnet Golang application.
 	 * Allows the user to post a list of json objects containing a "chirp":string and a "day":int to the backend
 	 * This endpoint should only be used by the MixNetwork if user upload anonymity is desired
 	 * Keys that are not within a 14 day range prior to the current day of the system will be discarded
- 	 * Ex: Posting 2 keys from day 1 and day 2
-     ```
+ 	 * Ex: Posting 2 keys from day 1 and day 2 `
 	  curl --location --request POST 'localhost:8080/InfectedKey' --header 'Content-Type: application/json' --data-raw '[
 			{
 				"chirp":"12345678-1234-5678-1234-567812345678",
@@ -98,32 +67,27 @@ itself, and the one that packs the mixnet Golang application.
 				"day":2
 			}
 	]'
-	```
+	`
  * GET /ContactCheck
  	* Requests the keys for a particular day (or some representation of those keys; see backend run modes above)
  	* The query param `day=int` can also be set to only query for keys tagged with that day.
 	* `day` can be omitted or set to -1 to request all of the days stored in the system
-  	* Ex: A request for all keys from day 2
-    ```
-    curl --location --request GET 'localhost:8080/ContactCheck?day=2' --data-raw ''
-    ```
+  	* Ex: A request for all keys from day 2 `curl --location --request GET 'localhost:8080/ContactCheck?day=2' --data-raw ''`
 
  * POST /ContactCheck
  	* A serverside check for key matches
 	* A user can upload a list of json objects containing a "chirp":string and "day":int to be checked against the backend
 	* The backend responds with true if a match is found or false if no match is found.
 	* May be useful for wearables where resources (memory/compute) may be constrained
- 	* Ex: Checking if a chirp is found on the backend
-    ```
-    curl --location --request POST 'localhost:8080/ContactCheck' --header 'Content-Type: application/json' --data-raw '{
+ 	* Ex: Checking if a chirp is found on the backend`curl --location --request POST 'localhost:8080/ContactCheck' --header 'Content-Type: application/json' --data-raw '{
 		"keyArray":[
 			{
 			"chirp":"12346678-1233-5648-1234-56781234e678",
 			"day":1
 			}
 		]
-	}'
-    ```
+	}'`
+
 ### Posting Keys using the Mix Network
  * A simple example client can be found at mixNet/TestClient.go
  * The goal of the mix network is to make sure that no single server knows both where the keys came from and the actual value of the keys at the same time, therefore the users ip is not linked to the keys that they have uploaded
