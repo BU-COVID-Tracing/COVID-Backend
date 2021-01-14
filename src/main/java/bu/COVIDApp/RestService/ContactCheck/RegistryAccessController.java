@@ -4,6 +4,10 @@ import bu.COVIDApp.Database.DatabaseInterface;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import bu.COVIDApp.RestService.AppContext;
 
 @Controller
 public class RegistryAccessController {
@@ -11,12 +15,17 @@ public class RegistryAccessController {
     /**
      * Used for interacting with data that is stored on whichever database the current scheme uses
      */
-    private final DatabaseInterface myInterface;
+    private DatabaseInterface myInterface;
+	
+    @Autowired
+    private AppContext ctx;
 
     public RegistryAccessController(){
-        this.myInterface = DatabaseInterface.InterfaceInitializer();
     }
-
+    @PostConstruct
+    public void PostConstruct(){
+        this.myInterface = DatabaseInterface.InterfaceInitializer(ctx);
+    }
     /**
      * Do some type of access that gets the user information that allows them to check if they have keys that have been marked
      * as infected. Return value will depend on scheme in use

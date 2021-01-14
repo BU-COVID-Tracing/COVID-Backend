@@ -21,9 +21,9 @@ public class SQLBloomFilterDatabaseInterface extends DatabaseInterface {
     //private final int BUCKET_SIZE_BYTES = 1;
 
 
-    public SQLBloomFilterDatabaseInterface(){
+    public SQLBloomFilterDatabaseInterface(AppContext ctx){
         //Equivalent to @Autowire annotation but happens at runtime rather than compile time to prevent packaging issues
-        keyReg = AppContext.getContext().getBean(SQLBloomFilterRegistry.class);
+        keyReg = ctx.getContext().getBean(SQLBloomFilterRegistry.class);
         bloomFilter = new BloomFilter();
     }
 

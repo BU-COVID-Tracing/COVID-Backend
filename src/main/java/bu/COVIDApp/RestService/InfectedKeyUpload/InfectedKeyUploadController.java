@@ -4,6 +4,8 @@ import bu.COVIDApp.Database.DatabaseInterface;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import bu.COVIDApp.RestService.AppContext;
 
 import java.util.List;
 
@@ -16,7 +18,9 @@ public class InfectedKeyUploadController {
      * Handles uploading keys to whatever database is being used to store them
      */
     private DatabaseInterface myInterface;
-
+    
+    @Autowired
+    private AppContext ctx;
     /**
      * Tells the post mapping if this is the first post call since initialization. If it is, initialize my interface
      */
@@ -38,7 +42,7 @@ public class InfectedKeyUploadController {
         //Trying to initialize in the constructor leads to a nullptr even though interface initializer is a static function
         //This issue only appears when trying to package the program and run from a jar file
         if(!initialized){
-            this.myInterface = DatabaseInterface.InterfaceInitializer();
+            this.myInterface = DatabaseInterface.InterfaceInitializer(ctx);
             this.initialized = true;
         }
 

@@ -55,7 +55,7 @@ if selection is optionsList[0] or optionsList[1]:
     dbContainerID = os.popen("docker run -d --rm -p 3306:3306 --network covid-net --name=covid-registry -e MYSQL_ROOT_PASSWORD=" + dbPassword + " mysql:latest").read()
 
     # Should try to do a check to see if the db is running rather than just sleeping
-    time.sleep(10) # Give time for the database to initialize before launching the backend
+    time.sleep(75) # Give time for the database to initialize before launching the backend
 
     #TODO: Substitute the location of the hosted image once it is up
-    os.popen("docker run -p 8080:8080 -dit --rm --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)
+    os.popen("docker run --expose 8000 -p 8080:8080 -dit --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)

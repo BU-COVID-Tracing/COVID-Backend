@@ -4,9 +4,10 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 
+@Repository
 public interface SQLKeySetRegistry extends CrudRepository<SQLKeySetData,Integer>{
     /**
      * A query that updates the contents of a bucket by ORing it with a bitmask
