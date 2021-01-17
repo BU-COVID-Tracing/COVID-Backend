@@ -58,4 +58,4 @@ if selection is optionsList[0] or optionsList[1]:
     time.sleep(75) # Give time for the database to initialize before launching the backend
 
     #TODO: Substitute the location of the hosted image once it is up
-    os.popen("docker run --expose 8000 -p 8080:8080 -dit --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)
+    os.popen("docker run -p 8080:8080 -dit --name=covid-backend --network covid-net covid-backend:latest " + selection + dbPasswordVar + dbUser + dbURL)

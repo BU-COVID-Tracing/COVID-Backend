@@ -12,7 +12,7 @@ import java.util.List;
 public class SQLKeySetDatabaseInterface extends DatabaseInterface {
    
  
-   private SQLKeySetRegistry keyReg;
+   private final SQLKeySetRegistry keyReg;
 
    //@Autowired
    //private ApplicationContext applicationContext;
@@ -39,7 +39,6 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
      */
     @Override
     public SQLKeySetResponse getData() {
-       System.out.println("Hello I am processing the request");
 	 ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
         return new SQLKeySetResponse(myData);
     }
@@ -50,8 +49,6 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
      */
     @Override
     public SQLKeySetResponse getData(Integer day) {
-	 System.out.println(keyReg == null);
-	 System.out.println("Hello follow the above lead");
         ArrayList<SQLKeySetData> myData = keyReg.dayQuery(day);
         return new SQLKeySetResponse(myData);
     }
