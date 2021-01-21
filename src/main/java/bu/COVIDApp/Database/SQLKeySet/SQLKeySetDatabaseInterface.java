@@ -2,18 +2,23 @@ package bu.COVIDApp.Database.SQLKeySet;
 
 import bu.COVIDApp.CovidBackendApplication;
 import bu.COVIDApp.Database.DatabaseInterface;
-import bu.COVIDApp.RestService.AppContext;
 import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.AppContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLKeySetDatabaseInterface extends DatabaseInterface {
-    private final SQLKeySetRegistry keyReg;
 
-    public SQLKeySetDatabaseInterface(){
+public class SQLKeySetDatabaseInterface extends DatabaseInterface {
+   
+ 
+   private final SQLKeySetRegistry keyReg;
+
+   //@Autowired
+   //private ApplicationContext applicationContext;
+   public SQLKeySetDatabaseInterface(AppContext ctx){
         //Equivalent to a manual @Autowire at runtime to get around the packaging issue
-        keyReg = AppContext.getContext().getBean(SQLKeySetRegistry.class);
+	    keyReg = ctx.getContext().getBean(SQLKeySetRegistry.class);
     }
 
     @Override
@@ -34,7 +39,7 @@ public class SQLKeySetDatabaseInterface extends DatabaseInterface {
      */
     @Override
     public SQLKeySetResponse getData() {
-        ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
+	 ArrayList<SQLKeySetData> myData = (ArrayList<SQLKeySetData>)keyReg.findAll();
         return new SQLKeySetResponse(myData);
     }
 

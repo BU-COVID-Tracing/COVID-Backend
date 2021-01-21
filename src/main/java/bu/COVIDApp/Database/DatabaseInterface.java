@@ -5,6 +5,7 @@ import bu.COVIDApp.Database.SQLBloomFilter.SQLBloomFilterDatabaseInterface;
 import bu.COVIDApp.Database.SQLKeySet.SQLKeySetDatabaseInterface;
 import bu.COVIDApp.Database.KVBloomFilter.KVBloomFilterDatabaseInterface;
 import bu.COVIDApp.RestService.InfectedKeyUpload.InfectedKey;
+import bu.COVIDApp.RestService.AppContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,16 +30,16 @@ public abstract class DatabaseInterface {
      * Also launches the cleanup thread that will occasionally clean old records from the db
      * @return An instantiated child class of DatabaseInterface
      */
-    public static DatabaseInterface InterfaceInitializer(){
+    public static DatabaseInterface InterfaceInitializer(AppContext ctx){
         System.out.println("Interface Initializer");
 
         if(systemDB == null){
             switch (CovidBackendApplication.myRunMode){
                 case SQLKeySet:
-                    systemDB = new SQLKeySetDatabaseInterface();
+                    systemDB = new SQLKeySetDatabaseInterface(ctx);
                     break;
                 case SQLBloomFilter:
-                    systemDB = new SQLBloomFilterDatabaseInterface();
+                    systemDB = new SQLBloomFilterDatabaseInterface(ctx);
                     break;
                 case BloomFilterKV:
                     systemDB = new KVBloomFilterDatabaseInterface();
